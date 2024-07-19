@@ -54,7 +54,7 @@ def generate_random_configs_3D(xlim, ylim, zlim):
     
     x_pos = (np.random.rand() - 0.5)*xlim # since the random number of 0.5 should correspond
     # to zero x-coordinate
-    y_pos = (np.random.rand() - 0.5)*xlim
+    y_pos = (np.random.rand() - 0.5)*ylim
     z_pos = (np.random.rand() - 0.5)*zlim
 
     # Generating a random vector for the tangent vector, and normalizing it
