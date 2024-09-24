@@ -9,11 +9,19 @@ import numpy as np
 import os
 import math
 import copy
+import sys
+
+# Including the following command to ensure that python is able to find the relevant files afer changing directory
+sys.path.insert(0, '')
+# Obtaining the current directory
+cwd = os.getcwd()
 
 # Importing code for plotting
-path = 'D:\TAMU\Research\Cylinder code'
-os.chdir(path)
+rel_path = '\Cylinder code'
+os.chdir(cwd + rel_path)
 from plotting_class import plotting_functions
+# Importing code for the cylinder
+from Cylinder_2D_Dubins_functions_simple import generate_visualize_path
 
 # Importing code for the sphere
 path = 'D:\TAMU\Research\Athindra files\Codes'
@@ -21,16 +29,8 @@ os.chdir(path)
 from IconfigFconfig import CustomInputFromOtherModule
 from Output import PP_modified
 
-# Importing code for the cylinder
-path = 'D:\TAMU\Research\Cylinder code'
-os.chdir(path)
-# from Cylinder_2D_Dubins_functions import generate_visualize_path_simple
-from Cylinder_2D_Dubins_functions_simple import generate_visualize_path
-
 # Returning to initial directory
-path = 'D:\TAMU\Research\Cylinder, sphere, and cone'
-
-os.chdir(path)
+os.chdir(cwd)
 
 def generate_random_configs_3D(xlim, ylim, zlim):
     '''

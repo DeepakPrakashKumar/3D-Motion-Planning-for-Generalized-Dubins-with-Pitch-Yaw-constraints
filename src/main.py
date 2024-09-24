@@ -3,9 +3,10 @@
 # directionality by conical envelopes.
 
 import math
-from cylinder_sphere_functions import generate_random_configs_3D
+from main_functions import generate_random_configs_3D
 
-# Here, we provide the description of the initial and final configurations
+# Here, we provide the description of the initial and final configurations if we
+# want to provide the initial and final configurations.
 
 
 # If a random initial and final configuration ought to be generated, we randomly generate the initial and final configurations.
@@ -23,3 +24,4 @@ r = 5 # This is the radius of the tight turn for the vehicle. Alternately, a geo
 loc_disc = 5
 heading_ang_disc = 3
 
+Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no)
