@@ -6,11 +6,7 @@ Created on Sun Feb  6 21:40:53 2022
 """
 
 import os
-
-path = 'D:\TAMU\Research\Cylinder and sphere'
-
-os.chdir(path)
-from cylinder_sphere_functions import *
+from cylinder_sphere_functions_heuristic import *
 
 # Setting the parameters
 # Setting the limits for the generation of the random initial and final configurations

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
-<ipe version="70218" creator="Ipe 7.2.23">
-<info created="D:20240711120018" modified="D:20240711155031"/>
+<ipe version="70218" creator="Ipe 7.2.24">
+<info created="D:20240711120018" modified="D:20241222160835"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -335,7 +335,7 @@ h
 </path>
 <text matrix="1 0 0 1 -13.8459 -10.5992" transformations="translations" pos="214.839 591.059" stroke="brown" type="label" width="13.538" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{X}_i</text>
 <use matrix="1 0 0 1 0.175739 -2.8861" name="mark/cross(sx)" pos="240.443 651.402" size="large" stroke="black"/>
-<text matrix="1 0 0 1 -3.63133 -6.39845" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="5.6" height="5.147" depth="0" valign="baseline" size="large" style="math">r</text>
+<text matrix="1 0 0 1 -3.63133 -6.39845" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 0.0001911 -0.00006837" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l
@@ -431,18 +431,18 @@ h
 </path>
 <text matrix="1 0 0 1 -5.59175 -5.82904" transformations="translations" pos="254.45 648.903" stroke="green" type="label" width="13.718" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{U}_i</text>
 <text matrix="1 0 0 1 38.6433 -13.3966" transformations="translations" pos="254.45 648.903" stroke="blue" type="label" width="13.538" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{Y}_i</text>
-<text matrix="1 0 0 1 90.0609 -82.0817" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="5.6" height="5.147" depth="0" valign="baseline" size="large" style="math">r</text>
+<text matrix="1 0 0 1 90.0609 -82.0817" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 93.6925 -75.6833" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l
 </path>
-<text matrix="1 0 0 1 211.914 -115.171" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="5.6" height="5.147" depth="0" valign="baseline" size="large" style="math">r</text>
+<text matrix="1 0 0 1 211.914 -115.171" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 215.545 -108.773" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l
 </path>
 <use matrix="1 0 0 1 -4.66823 -3.93325" name="mark/cross(sx)" pos="449.507 639.268" size="large" stroke="black"/>
-<text matrix="1 0 0 1 236.854 -37.8413" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="5.6" height="5.147" depth="0" valign="baseline" size="large" style="math">r</text>
+<text matrix="1 0 0 1 236.854 -37.8413" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 240.486 -31.443" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l

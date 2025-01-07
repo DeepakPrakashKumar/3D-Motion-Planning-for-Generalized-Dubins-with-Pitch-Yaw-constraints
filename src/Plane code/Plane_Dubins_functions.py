@@ -758,4 +758,4 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
         # Writing onto the html file
         fig_plane_path.writing_fig_to_html(filename, 'a')
                     
-    return path_lengths, opt_path_type_configs, pts_path_x_coords_opt, pts_path_y_coords_opt
+    return opt_path_length, path_params_opt, opt_path_type_configs, pts_path_x_coords_opt, pts_path_y_coords_opt

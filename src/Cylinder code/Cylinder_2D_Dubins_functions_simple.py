@@ -13,19 +13,29 @@ import plotly.offline as py
 import os
 pio.renderers.default='browser'
 import copy
+import sys
+
+# Including the following command to ensure that python is able to find the relevant files afer changing directory
+sys.path.insert(0, '')
 
 # Loading the plotting class
 from plotting_class import plotting_functions
 
-# Loading the Dubins code
-path_codes = 'D:\TAMU\Research\TwoD_Dubins_python_code'
-
-os.chdir(path_codes)
-from Dubins_functions import CCC_path_efficient, CSC_path_efficient, points_path,\
-    tight_circles, Seg_pts
+# Obtaining the current directory
+cwd = os.getcwd()
+# Changing to one directory higher (since planar Dubins functions is located in another folder)
+os.chdir("..")
+# Obtaining current common directory
+common_dir = os.getcwd()
+# Loading the 2D Dubins code
+rel_path_codes = '\Plane code'
+# Changing the directory
+os.chdir(common_dir + rel_path_codes)
+# Importing the functions
+from Plane_Dubins_functions import points_path, optimal_dubins_path
     
 # Returning to the original directory
-path = 'D:\TAMU\Research\Cylinder code'
+os.chdir(cwd)
 
 def generate_random_configs_cylinder(R, zmax):
     '''
@@ -166,7 +176,7 @@ def unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, point_pos, point_tang
         theta1 = deltheta
         theta2 = deltheta - 2*math.pi
         
-    elif deltheta == 0:
+    elif deltheta == 0: # HERE, CONSIDER TWO ADDITIONAL ANGLES; -2*PI, AND 2*PI.
         
         theta1 = theta2 = deltheta
         
@@ -185,106 +195,6 @@ def unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, point_pos, point_tang
                                           + point_tang_vect[1]*math.cos(thetao)))
         
     return pos_plane_1, pos_plane_2, heading_ini_pos_plane, heading_point_pos_plane
-
-def Dubins_path_plane(ini_config, fin_config, rad_tight_turn, filename = False):
-    '''
-    This function generates the length of each three segment path connecting the
-    initial and final configuration on a plane. The functions developed in the file
-    Dubins_functions.py is used for this purpose. The details of the generated paths
-    are written onto a html file if the argument "filename" is passed. The function also
-    returns the parameters for each path type, i.e., the lengths/angles of the first,
-    second, and third arcs. In this function, t corresponds to the angle of the first
-    segment, p corresponds to the angle (for CCC path) or length (for CSC path) for the
-    second segment, and q corresponds to the angle of the third segment.
-
-    Parameters
-    ----------
-    ini_config : Numpy 1x3 array
-        Contains the x and y coordinate (first two indeces) of the initial position and
-        the heading angle (last entry).
-    fin_config : Numpy 1x3 array
-        Contains the x and y coordinate (first two indeces) of the final position and
-        the heading angle (last entry).
-    rad_tight_turn : Scalar
-        Radius of the tight circle turn.
-    filename : String
-        Name of the html file in which the results should be stored.
-
-    Returns
-    -------
-    path_types : Numpy 1x8 array
-        Contains strings representing the path type.
-    path_lengths : Numpy 1x8 array
-        Contains the path length corresponding to each path type in the path_types variable.
-        NaN is returned when a corresponding path does not exist.
-    t, p, q : Numpy 1x8 arrays
-        Contains the angles (for tight turns) and lengths (for straight line segments) for
-        each path type.
-    '''
-    
-    path_types = np.array(['lsl', 'rsr', 'lsr', 'rsl', 'lrl', 'lrl', 'rlr', 'rlr'])
-    path_lengths = np.empty(8)
-    t = np.empty(8)
-    p = np.empty(8)
-    q = np.empty(8)
-
-    count_lrl = 1 # counter to ensure lrl path is run only once, as the CCC path generation
-    # function generates both lrl paths
-    count_rlr = 1 # counter to ensure rlr path is run only once
-    
-    for i in range(len(path_types)):
-        
-        # Checking if path is CSC type
-        if path_types[i][1] == 's':
-        
-            # Obtaining the path length and lengths of the segments
-            path_lengths[i], t[i], p[i], q[i] = CSC_path_efficient(ini_config, fin_config,\
-                                                                   rad_tight_turn, path_types[i], 0)
-            
-        # If not, path is of type CCC
-        else:
-            
-            if (path_types[i][0] == 'l' and count_lrl == 1) or\
-                (path_types[i][0] == 'r' and count_rlr == 1):
-            
-                # Obtaining the path length and lengths of the segments and adding to the array
-                path_lengths[i: i+2], t[i: i+2], p[i: i+2], q[i: i+2] =\
-                    CCC_path_efficient(ini_config, fin_config, rad_tight_turn, path_types[i], 0)
-                # NOTE: If the CCC path does not exist, np.NaN is added for both the "paths" in the
-                # two indeces for each variable.
-                
-                # Incrementing the corresponding counter
-                if path_types[i][0] == 'l':
-                    
-                    count_lrl += 1
-                    
-                else:
-                    
-                    count_rlr += 1
-    
-    if filename != False:
-        
-        # Printing details about paths that exist onto the html file
-        text = []
-        values = []
-        # Writing number of possible paths
-        text.append("Number of paths is ")
-        values.append(np.count_nonzero(~np.isnan(path_lengths)))
-        
-        # Writing lengths of all the existing paths
-        for i in range(len(path_types)):
-            if np.isnan(path_lengths[i]) == False: # If the path exists
-                temp = "Length of " + path_types[i].upper() + " path is "
-                text.append(temp)
-                values.append(path_lengths[i])
-        
-        # Writing onto the html file
-        with open(filename, 'a') as f:
-            f.write("<br>")
-            for i in range(len(text)):
-                f.write(text[i] + str(values[i]) + ".<br />")
-    
-    return path_types, path_lengths, t, p, q
 
 def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
                             zmax = 20, visualization = 1, rad_tight_turn = 1, filename = 'temp.html'):
@@ -310,8 +220,9 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     zmax: Scalar
         Maximum value corresponding to the z-value of the randomly generated coordinates.
     visualization : TYPE, optional
-        DESCRIPTION. The default is 1. If value is 0, optimal path between the initial
-        and final configuration is returned, but plots are not generated.
+        The default is 1. If value is 0, optimal path between the initial
+        and final configuration is returned, but plots are not generated. If 1,
+        the plots are visualized in the passed html file.
     rad_tight_turn : Scalar
         Radius of the tight circle turn.
 
@@ -342,34 +253,31 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Obtaining all the information regarding the paths from the initial configuration to
     # the two images of the final configuration
-    path_types, path_lengths_img_1, t_paths_img_1, p_paths_img_1, q_paths_img_1 =\
-        Dubins_path_plane(ini_config, fin_config_1, rad_tight_turn, False)
-    _, path_lengths_img_2, t_paths_img_2, p_paths_img_2, q_paths_img_2 =\
-        Dubins_path_plane(ini_config, fin_config_2, rad_tight_turn, False)
-        
-    # Finding the optimal path
-    min_path_length_img1 = min(path_lengths_img_1)
-    min_path_length_img2 = min(path_lengths_img_2)
+    path_length_img_1, path_params_img_1, path_type_img_1, _, _ = \
+        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, False)
+    path_length_img_2, path_params_img_2, path_type_img_2, _, _ = \
+        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, False)
     
     # Finding the optimal path type, the minimum length of the path, and the parameters
     # of the path
-    if min_path_length_img1 <= min_path_length_img2:
+    if path_length_img_1 <= path_length_img_2:
         
-        min_path_index = np.nanargmin(path_lengths_img_1)
-        min_path_length = min_path_length_img1
-        t_opt = t_paths_img_1[min_path_index]
-        p_opt = p_paths_img_1[min_path_index]
-        q_opt = q_paths_img_1[min_path_index]
+        min_path_length = path_length_img_1
+        # Obtaining the parameters of the optimal path
+        t_opt = path_params_img_1[0]
+        p_opt = path_params_img_1[1]
+        q_opt = path_params_img_1[2]
         opt_fin_img = fin_config_1
+        opt_path_type = path_type_img_1
         
     else:
         
-        min_path_index = np.nanargmin(path_lengths_img_2)
-        min_path_length = min_path_length_img2
-        t_opt = t_paths_img_2[min_path_index]
-        p_opt = p_paths_img_2[min_path_index]
-        q_opt = q_paths_img_2[min_path_index]
+        min_path_length = path_length_img_2
+        t_opt = path_params_img_2[0]
+        p_opt = path_params_img_2[1]
+        q_opt = path_params_img_2[2]
         opt_fin_img = fin_config_2
+        opt_path_type = path_type_img_2
     
     if visualization == 1:
         
@@ -452,124 +360,83 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
             f.write("<br\><br\><br\>Details of the paths:")
         with open(filename, 'a') as f:
             f.write("<br\>-----------Paths to first image of the final configuration-----------")
-        Dubins_path_plane(ini_config, fin_config_1, rad_tight_turn, filename)
+        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, filename)
         with open(filename, 'a') as f:
             f.write("-----------Paths to second image of the final configuration-----------")
-        Dubins_path_plane(ini_config, fin_config_2, rad_tight_turn, filename)
+        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, filename)
         with open(filename, 'a') as f:
-            f.write("Optimal path is of type " + path_types[min_path_index].upper() + " and of length "\
+            f.write("Optimal path is of type " + opt_path_type.upper() + " and of length "\
                     + str(min_path_length) + ".<br />")
                 
-        # Generating each path on the plane and the corresponding path on the cylinder
-        # Counter for LRL and RLR paths to accordingly modify the title
-        count_lrl = 1
-        count_rlr = 1
-        for i in range(len(path_types)):
+        # Generating each path on the plane and the corresponding path on the cylinder            
+        # Making a copy of the figure on the plane to augment the path to
+        fig_plane_path = copy.deepcopy(fig_plane)
+        # Making a copy of the figure on the cylinder to augment the path to
+        fig_cylinder_path = copy.deepcopy(fig_cylinder)   
+        
+        # Obtaining the points along the path using the points_path function if path exists
+        # Path to first image        
+        # Obtaining the points along the path for the first image and plotting on the plane
+        pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1 =\
+            points_path(ini_config, rad_tight_turn, path_params_img_1, path_type_img_1)
+        fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1,\
+                                    'blue', 'Optimal path to first image of type ' + path_type_img_1.upper())
+        
+        # Path to second image        
+        # Obtaining the points along the path for the second image and plotting on the plane
+        pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2 =\
+            points_path(ini_config, rad_tight_turn, path_params_img_2, path_type_img_2)
+        fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2,\
+                                    'purple', 'Optimal path to second image of type ' + path_type_img_2.upper())
+        
+        # Generating the paths on the cylinder using the coordinates of the curve on the plane
+        # Using the coordinates of points on the path on the plane, the corresponding
+        # coordinates of the path on the cylinder in the global frame can be directly obtained.
+        # The same expression is used to plot the path on the cylinder
+        
+        # Obtaining the coordinates for the path to the first image of the final configuration
+        # that is wrapped onto the cylinder if path exists        
+        path_img_1_x_coord = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
+                                        for j in pts_path_plane_x_coord_img_1])
+        path_img_1_y_coord = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
+                                        for j in pts_path_plane_x_coord_img_1])
+        path_img_1_z_coord = np.array([(ini_pos[2] + j) for j in pts_path_plane_y_coord_img_1])
+        # Plotting the path on the cylinder
+        fig_cylinder_path.scatter_3D(path_img_1_x_coord, path_img_1_y_coord,\
+                                        path_img_1_z_coord, 'blue', 'Optimal path to the first image of type '\
+                                             + path_type_img_1.upper())
+        
+        # Obtaining the coordinates for the path to the second image of the final configuration
+        # that is wrapped onto the cylinder if path exists            
+        path_img_2_x_coord = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
+                                        for j in pts_path_plane_x_coord_img_2])
+        path_img_2_y_coord = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
+                                        for j in pts_path_plane_x_coord_img_2])
+        path_img_2_z_coord = np.array([(ini_pos[2] + j) for j in pts_path_plane_y_coord_img_2])
+        # Plotting the path on the cylinder
+        fig_cylinder_path.scatter_3D(path_img_2_x_coord, path_img_2_y_coord,\
+                                        path_img_2_z_coord, 'purple', 'Optimal path to the second image of type '\
+                                              + path_type_img_2.upper())
+        
+        # Adding the figures, i.e., on the plane and the cylinder to the html file        
+        # Adding labels to the axis and title to the plot
+        fig_plane_path.update_layout_2D('x (m)', [-2*(math.pi*R + rad_tight_turn),\
+                                                    2*(math.pi*R + rad_tight_turn)],\
+                                        'z (m)', [-zmax-2*rad_tight_turn, zmax+2*rad_tight_turn],\
+                                        'Optimal paths on the plane')
+        # Writing onto the html file
+        fig_plane_path.writing_fig_to_html(filename, 'a')
             
-            # Making a copy of the figure on the plane to augment the path to
-            fig_plane_path = copy.deepcopy(fig_plane)
-            # Making a copy of the figure on the cylinder to augment the path to
-            fig_cylinder_path = copy.deepcopy(fig_cylinder)   
-            
-            # Obtaining the points along the path using the points_path function if path exists
-            # Path to first image
-            if np.isnan(path_lengths_img_1[i]) == False:
-            
-                # Obtaining the points along the path for the first image and plotting on the plane
-                pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1 =\
-                    points_path(ini_config, fin_config_1, rad_tight_turn, t_paths_img_1[i],\
-                                p_paths_img_1[i], q_paths_img_1[i], path_types[i])
-                fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1,\
-                                          'blue', 'Path to first image')
-            
-            # Path to second image
-            if np.isnan(path_lengths_img_2[i]) == False:
-            
-                # Obtaining the points along the path for the second image and plotting on the plane
-                pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2 =\
-                    points_path(ini_config, fin_config_2, rad_tight_turn, t_paths_img_2[i],\
-                                p_paths_img_2[i], q_paths_img_2[i], path_types[i])
-                fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2,\
-                                          'purple', 'Path to second image')       
-            
-            # Generating the paths on the cylinder using the coordinates of the curve on the plane
-            # Using the coordinates of points on the path on the plane, the corresponding
-            # coordinates of the path on the cylinder in the global frame can be directly obtained.
-            # The same expression is used to plot the path on the cylinder
-            
-            # Obtaining the coordinates for the path to the first image of the final configuration
-            # that is wrapped onto the cylinder if path exists
-            if np.isnan(path_lengths_img_1[i]) == False:
-            
-                path_img_1_x_coord = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
-                                               for j in pts_path_plane_x_coord_img_1])
-                path_img_1_y_coord = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
-                                               for j in pts_path_plane_x_coord_img_1])
-                path_img_1_z_coord = np.array([(ini_pos[2] + j) for j in pts_path_plane_y_coord_img_1])
-                # Plotting the path on the cylinder
-                fig_cylinder_path.scatter_3D(path_img_1_x_coord, path_img_1_y_coord,\
-                                             path_img_1_z_coord, 'blue', 'Path to the first image')
-            
-            # Obtaining the coordinates for the path to the second image of the final configuration
-            # that is wrapped onto the cylinder if path exists
-            if np.isnan(path_lengths_img_2[i]) == False:
-                
-                path_img_2_x_coord = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
-                                               for j in pts_path_plane_x_coord_img_2])
-                path_img_2_y_coord = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
-                                               for j in pts_path_plane_x_coord_img_2])
-                path_img_2_z_coord = np.array([(ini_pos[2] + j) for j in pts_path_plane_y_coord_img_2])
-                # Plotting the path on the cylinder
-                fig_cylinder_path.scatter_3D(path_img_2_x_coord, path_img_2_y_coord,\
-                                             path_img_2_z_coord, 'purple', 'Path to the second image')
-            
-            # Adding the figures, i.e., on the plane and the cylinder to the html file if a path
-            # to one of the two images exist
-            if np.isnan(path_lengths_img_1[i]) == False or np.isnan(path_lengths_img_2[i]) == False:
-            
-                if path_types[i][1] == 's':
-                    
-                    path_name = path_types[i].upper() + ' path'
-                    
-                else:
-                    
-                    if path_types[i][1] == 'r' and count_lrl == 1:
-                        
-                        path_name = 'First ' + path_types[i].upper() + ' path'
-                        count_lrl += 1 # Incrementing value of count_lrl
-                        
-                    elif path_types[i][1] == 'r' and count_lrl == 2:
-                        
-                        path_name = 'Second ' + path_types[i].upper() + ' path'
-                        
-                    elif path_types[i][1] == 'l' and count_rlr == 1:
-                        
-                        path_name = 'First ' + path_types[i].upper() + ' path'
-                        count_rlr += 1 # Incrementing value of count_rlr
-                        
-                    elif path_types[i][1] == 'l' and count_rlr == 2:
-                        
-                        path_name = 'Second ' + path_types[i].upper() + ' path'
-            
-                # Adding labels to the axis and title to the plot
-                fig_plane_path.update_layout_2D('x (m)', [-2*(math.pi*R + rad_tight_turn),\
-                                                          2*(math.pi*R + rad_tight_turn)],\
-                                                'z (m)', [-zmax-2*rad_tight_turn, zmax+2*rad_tight_turn],\
-                                                path_name + ' on the plane')
-                # Writing onto the html file
-                fig_plane_path.writing_fig_to_html(filename, 'a')
-                    
-                # Adding labels to the axis and title to the plot
-                fig_cylinder_path.update_layout_3D('X (m)', 'Y (m)', 'Z (m)',\
-                                                   path_name + ' on the cylinder')
-                # Writing onto the html file
-                fig_cylinder_path.writing_fig_to_html(filename, 'a')
+        # Adding labels to the axis and title to the plot
+        fig_cylinder_path.update_layout_3D('X (m)', 'Y (m)', 'Z (m)',\
+                                            'Optimal paths on the cylinder')
+        # Writing onto the html file
+        fig_cylinder_path.writing_fig_to_html(filename, 'a')
     
     # Generating the coordinates of the optimal path
     # Obtaining the points for the optimal path on the plane
     pts_opt_path_plane_x_coord, pts_opt_path_plane_y_coord =\
-        points_path(ini_config, opt_fin_img, rad_tight_turn, t_opt,\
-                    p_opt, q_opt, path_types[min_path_index])
+        points_path(ini_config, rad_tight_turn, [t_opt, p_opt, q_opt], opt_path_type)
             
     # Obtaining the coordinates for the optimal path in the global frame for the cylinder
     points_path_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
@@ -593,4 +460,4 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         # Writing onto the html file
         fig_cylinder_path.writing_fig_to_html(filename, 'a')
     
-    return min_path_length, path_types[min_path_index], points_path_global
+    return min_path_length, opt_path_type, points_path_global

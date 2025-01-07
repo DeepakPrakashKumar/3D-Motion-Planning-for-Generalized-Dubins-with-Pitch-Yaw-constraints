@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb  6 20:51:49 2022
+Created on Sun Feb 6 20:51:49 2022
 
 @author: deepa
 """
@@ -329,9 +329,11 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
                         if np.isnan(sp_1_rr_path_lengths[i, j]): # Checking if path length was already computed
                             
                             filename_sp = "sp_1_rr_thetai_" + str(i) + "_phii_" + str(j) + ".html"
-                            sp_1_rr_path_lengths[i, j], _, _, _, _, _, _ = \
-                                CustomInputFromOtherModule(filename_sp, 'p', ini_config[0, :] - ini_config_right_sp,\
-                                                            Pic - ini_config_right_sp, ini_config[1, :], Tic, r, R, 10)
+                            # EDIT FROM HERE!!!
+                            # sp_1_rr_path_lengths[i, j], _, _, _, _, _, _ = \
+                            #     CustomInputFromOtherModule(filename_sp, 'p', ini_config[0, :] - ini_config_right_sp,\
+                            #                                 Pic - ini_config_right_sp, ini_config[1, :], Tic, r, R, 10)
+                            # optimal_path_sphere_three_seg(ini_config[0, :] - ini_config_right_sp)
                         
                         # Finding the minimum distance on the cylinder
                         # For this purpose, the configurations in the frame fixed
@@ -658,7 +660,7 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
 
 def configurations_discrete_angles(thetai, phii, thetao, phio, orig_cyl, xaxis_cyl, zaxis_cyl, ht_cyl, R):
     '''
-    
+    In this function, the configurations as a function of the parameters selected is computed.
 
     Parameters
     ----------

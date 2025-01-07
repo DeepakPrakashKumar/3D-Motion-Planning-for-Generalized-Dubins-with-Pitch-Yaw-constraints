@@ -19,4 +19,6 @@ r = 1
 ini_config = np.array([0, 0, 0])
 fin_config = np.array([0, 0, math.pi])
 
-path_lengths, opt_path_type_configs, x, y = optimal_dubins_path(ini_config, fin_config, r)
+path_length, path_params_opt, opt_path_type_configs, x, y = optimal_dubins_path(ini_config, fin_config, r)
+
+print('Optimal path is of type ', opt_path_type_configs, ' with length ', path_length, ' and parameters ', path_params_opt)

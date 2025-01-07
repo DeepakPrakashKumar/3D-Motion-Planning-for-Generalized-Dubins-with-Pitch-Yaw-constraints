@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE ipe SYSTEM "ipe.dtd">
 <ipe version="70218" creator="Ipe 7.2.24">
-<info created="D:20240711120018" modified="D:20241222161037"/>
+<info created="D:20240711120018" modified="D:20241015094747"/>
 <ipestyle name="basic">
 <symbol name="arrow/arc(spx)">
 <path stroke="sym-stroke" fill="sym-stroke" pen="sym-pen">
@@ -330,100 +330,138 @@ h
 <path stroke="purple" fill="purple" pen="heavier" opacity="30%" stroke-opacity="50%">
 40.6323 0 0 40.6323 419.898 558.005 e
 </path>
-<use name="mark/cross(sx)" pos="298.045 591.095" size="large" stroke="black"/>
-<use name="mark/cross(sx)" pos="419.898 558.005" size="large" stroke="black"/>
-<path matrix="1 0 0 1 0.00037029 0.00013351" stroke="purple" fill="purple" pen="heavier" opacity="30%" stroke-opacity="50%">
-40.5923 0 0 40.5923 298.045 591.095 e
-</path>
-<text matrix="1 0 0 1 -9.09842 22.129" transformations="translations" pos="315.403 646.234" stroke="black" type="minipage" width="61.3321" height="14.702" depth="9.74" valign="top" size="large">Tangent plane at $\mathbf{X}_i$</text>
-<path matrix="1 0 0 1 165.671 -21.5829" stroke="black" fill="gray" pen="heavier" opacity="30%" stroke-opacity="50%">
-76.1789 629.513 m
-40.604 0 0 40.604 74.9476 670.099 112.764 655.312 a
-130.721 667.976 l
-154.415 661.719 l
-72.554 603.992 l
-48.86 610.249 l
-h
-</path>
 <text matrix="1 0 0 1 -13.8459 -10.5992" transformations="translations" pos="214.839 591.059" stroke="brown" type="label" width="13.538" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{X}_i</text>
-<path matrix="1 0 0 1 -0.00000295 0.00016008" stroke="orange" fill="orange" pen="heavier" opacity="30%" stroke-opacity="50%">
-40.604 0 0 40.604 240.618 648.516 e
-</path>
-<use matrix="1 0 0 1 0.074318 0.0930035" name="mark/disk(sx)" pos="269.331 619.804" size="large" stroke="black"/>
-<path matrix="0.999468 0 0 0.999468 0.218445 0.422569" stroke="red" pen="heavier" arrow="normal/normal">
-269.331 619.804 m
-295.115 606.912 l
-</path>
-<path matrix="1.22413 0 0 0.754125 -60.2703 152.489" stroke="blue" pen="heavier" arrow="normal/normal">
-269.331 619.804 m
-287.944 642.546 l
-</path>
-<path matrix="0.764531 0 0 1.0012 63.5228 -0.641113" stroke="brown" pen="heavier" arrow="normal/normal">
-162.456 533.684 m
-269.331 619.804 l
-</path>
-<text matrix="1 0 0 1 42.2981 -38.4602" transformations="translations" pos="254.45 648.903" stroke="red" type="label" width="12.735" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{T}_i</text>
-<path matrix="1 0 0 1 0.102358 0.103445" stroke="green" pen="heavier" arrow="normal/normal">
-269.331 619.804 m
-249.276 639.859 l
-</path>
-<text matrix="1 0 0 1 -5.5917 -5.82868" transformations="translations" pos="254.45 648.903" stroke="green" type="label" width="13.718" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{U}_i</text>
-<text matrix="1 0 0 1 38.6434 -13.3962" transformations="translations" pos="254.45 648.903" stroke="blue" type="label" width="13.538" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{Y}_i</text>
 <use matrix="1 0 0 1 0.175739 -2.8861" name="mark/cross(sx)" pos="240.443 651.402" size="large" stroke="black"/>
 <text matrix="1 0 0 1 -3.63133 -6.39845" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 0.0001911 -0.00006837" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l
 </path>
-<text matrix="1 0 0 1 90.061 -82.0813" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
-<path matrix="1 0 0 1 93.6926 -75.6829" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
-240.618 648.516 m
-204.353 666.778 l
+<use matrix="1 0 0 1 -0.00036844 -0.00010067" name="mark/disk(sx)" pos="432.375 596.674" size="large" stroke="black"/>
+<path matrix="1 0 0 1 -204.221 13.1809" stroke="orange" fill="orange" pen="heavier" opacity="30%" stroke-opacity="50%">
+40.6207 0 0 40.6207 444.839 635.336 e
 </path>
+<use matrix="1 0 0 1 -0.0000501 -0.00035876" name="mark/cross(sx)" pos="419.898 558.005" size="large" stroke="black"/>
+<use matrix="1 0 0 1 0.0742679 0.0926447" name="mark/disk(sx)" pos="269.331 619.804" size="large" stroke="black"/>
+<path matrix="0.999468 0 0 0.999468 0.218395 0.42221" stroke="red" pen="heavier" arrow="normal/normal">
+269.331 619.804 m
+295.115 606.912 l
+</path>
+<path matrix="1.22413 0 0 0.754125 -60.2704 152.489" stroke="blue" pen="heavier" arrow="normal/normal">
+269.331 619.804 m
+287.944 642.546 l
+</path>
+<path matrix="0.764531 0 0 1.0012 63.5227 -0.641472" stroke="brown" pen="heavier" arrow="normal/normal">
+162.456 533.684 m
+269.331 619.804 l
+</path>
+<text matrix="1 0 0 1 42.4581 -47.2664" transformations="translations" pos="254.45 648.903" stroke="red" type="label" width="12.735" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{T}_i</text>
+<path matrix="1 0 0 1 0.102308 0.103086" stroke="green" pen="heavier" arrow="normal/normal">
+269.331 619.804 m
+249.276 639.859 l
+</path>
+<text matrix="1 0 0 1 -12.9566 -23.9209" transformations="translations" pos="254.45 648.903" stroke="green" type="label" width="13.718" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{U}_i</text>
+<text matrix="1 0 0 1 33.8346 -26.1167" transformations="translations" pos="254.45 648.903" stroke="blue" type="label" width="13.538" height="8.206" depth="1.79" valign="baseline" size="large" style="math">\mathbf{Y}_i</text>
 <text matrix="1 0 0 1 211.914 -115.171" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
 <path matrix="1 0 0 1 215.545 -108.773" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
 240.618 648.516 m
 204.353 666.778 l
 </path>
-<path stroke="black" fill="gray" pen="heavier" opacity="30%" stroke-opacity="50%">
-412.235 611.107 m
-40.6207 0 0 40.6207 444.839 635.336 457.157 596.628 a
-488.805 586.427 l
-466.029 576.734 l
-370.227 607.612 l
-393.003 617.306 l
-h
-</path>
-<path matrix="1 0 0 1 -0.00049607 0.00000103" stroke="orange" fill="orange" pen="heavier" opacity="30%" stroke-opacity="50%">
-40.6207 0 0 40.6207 444.839 635.336 e
-</path>
-<use matrix="1 0 0 1 -0.00036844 -0.00010067" name="mark/disk(sx)" pos="432.375 596.674" size="large" stroke="black"/>
-<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.198 161.415" stroke="blue" pen="heavier" arrow="normal/normal">
+<text matrix="1 0 0 1 49.975 -47.9179" transformations="translations" pos="214.839 591.059" stroke="brown" type="label" width="15.601" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{X}_f</text>
+<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.298 161.447" stroke="blue" pen="heavier" arrow="normal/normal">
 432.375 596.674 m
 467.068 596.674 l
 </path>
-<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.198 161.415" stroke="red" pen="heavier" arrow="normal/normal">
+<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.298 161.447" stroke="red" pen="heavier" arrow="normal/normal">
 432.375 596.674 m
 411.837 576.136 l
 </path>
-<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.198 161.415" stroke="green" pen="heavier" arrow="normal/normal">
+<path matrix="0.951781 -0.306779 0.306779 0.951781 -162.298 161.447" stroke="green" pen="heavier" arrow="normal/normal">
 432.375 596.674 m
 432.375 627.435 l
 </path>
-<text matrix="1 0 0 1 137.747 -75.3431" transformations="translations" pos="254.45 648.903" stroke="red" type="label" width="14.799" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{T}_f</text>
-<text matrix="1 0 0 1 209.006 -64.4827" transformations="translations" pos="254.45 648.903" stroke="blue" type="label" width="15.601" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{Y}_f</text>
-<text matrix="1 0 0 1 170.469 -20.7612" transformations="translations" pos="254.45 648.903" stroke="green" type="label" width="15.781" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{U}_f</text>
-<use matrix="1 0 0 1 -4.66818 -3.93289" name="mark/cross(sx)" pos="449.507 639.268" size="large" stroke="black"/>
-<text matrix="1 0 0 1 236.854 -37.8409" transformations="translations" pos="225.663 669.521" stroke="black" type="label" width="9.009" height="8.169" depth="0" valign="baseline" size="large" style="math">R</text>
-<path matrix="1 0 0 1 240.486 -31.4426" stroke="black" pen="heavier" arrow="normal/normal" rarrow="normal/normal">
-240.618 648.516 m
-204.353 666.778 l
-</path>
-<text matrix="1 0 0 1 27.5852 -22.1948" transformations="translations" pos="315.403 646.234" stroke="black" type="minipage" width="37.823" height="22.178" depth="17.23" valign="top" size="large">Tangent plane at $\mathbf{X}_f$</text>
-<path matrix="0.906415 0 0 1 40.4732 0" stroke="brown" pen="heavier" arrow="normal/normal">
+<text matrix="1 0 0 1 170.875 -69.4167" transformations="translations" pos="254.45 648.903" stroke="red" type="label" width="14.799" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{T}_f</text>
+<text matrix="1 0 0 1 208.906 -64.4512" transformations="translations" pos="254.45 648.903" stroke="blue" type="label" width="15.601" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{Y}_f</text>
+<text matrix="1 0 0 1 190.966 -28.3345" transformations="translations" pos="254.45 648.903" stroke="green" type="label" width="15.781" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{U}_f</text>
+<path matrix="0.906415 0 0 1 40.3727 0.0315405" stroke="brown" pen="heavier" arrow="normal/normal">
 162.456 533.684 m
 432.475 596.642 l
 </path>
-<text matrix="1 0 0 1 129.168 -24.9009" transformations="translations" pos="214.839 591.059" stroke="brown" type="label" width="15.601" height="8.206" depth="3.34" valign="baseline" size="large" style="math">\mathbf{X}_f</text>
+<path stroke="black" dash="dotted" pen="heavier">
+240.618 648.516 m
+420.124 557.928 l
+</path>
+<path matrix="0.656169 0 0 0.656169 82.7319 222.98" stroke="black" dash="dotted" pen="heavier">
+240.618 648.517 m
+288.392 687.886 l
+</path>
+<path matrix="0.656169 0 0 0.656169 230.574 106.745" stroke="black" dash="dotted" pen="heavier">
+240.618 648.517 m
+288.392 687.886 l
+</path>
+<group matrix="1 0 0 1 50.7104 213.773" clip="187.919 394.092 m
+221.317 460.544 l
+261.743 440.225 l
+228.344 373.774 l
+h
+">
+<path matrix="0.186923 -0.0939481 0.449073 0.893495 -131.006 -121.506" stroke="darkcyan" dash="dotted" pen="heavier">
+37.1869 0 0 37.1869 255.328 641.092 e
+</path>
+</group>
+<group matrix="1 0 0 1 -173.705 235.666" clip="412.334 372.2 m
+445.732 438.651 l
+375.298 474.051 l
+341.9 407.6 l
+h
+">
+<path matrix="0.186923 -0.0939481 0.449073 0.893495 93.4094 -143.399" stroke="darkcyan" pen="heavier">
+37.1869 0 0 37.1869 255.328 641.092 e
+</path>
+</group>
+<group matrix="1 0 0 1 200.63 138.117" clip="187.919 394.092 m
+221.317 460.544 l
+261.743 440.225 l
+228.344 373.774 l
+h
+">
+<path matrix="0.186923 -0.0939481 0.449073 0.893495 -131.006 -121.506" stroke="darkcyan" dash="dotted" pen="heavier">
+37.1869 0 0 37.1869 255.328 641.092 e
+</path>
+</group>
+<group matrix="1 0 0 1 -23.7855 160.009" clip="412.334 372.2 m
+445.732 438.651 l
+375.298 474.051 l
+341.9 407.6 l
+h
+">
+<path matrix="0.186923 -0.0939481 0.449073 0.893495 93.4094 -143.399" stroke="darkcyan" pen="heavier">
+37.1869 0 0 37.1869 255.328 641.092 e
+</path>
+</group>
+<use name="mark/cross(sx)" pos="255.328 641.092" size="large" stroke="darkcyan"/>
+<use matrix="1 0 0 1 149.991 -75.5153" name="mark/cross(sx)" pos="255.328 641.092" size="large" stroke="darkcyan"/>
+<path matrix="1.94892 0 0 1.94892 -327.599 -544.923" stroke="black" pen="heavier">
+345.234 574.258 m
+388.47 532.251 l
+</path>
+<path matrix="1.99625 0 0 1.99625 -270.613 -672.042" stroke="darkcyan" pen="heavier">
+330.371 603.222 m
+271.966 674.35 l
+</path>
+<path stroke="black" pen="heavier">
+229.093 716.078 m
+313.356 634.209 l
+379.527 553.409 l
+</path>
+<path stroke="black" pen="heavier">
+407.433 519.332 m
+429.498 492.389 l
+345.234 574.258 l
+229.093 716.078 l
+</path>
+<text matrix="1 0 0 1 12.6379 0" transformations="translations" pos="314.042 652.124" stroke="black" type="minipage" width="91.2741" height="14.702" depth="9.74" valign="top" size="large">Cross-tangent plane</text>
+<text matrix="1 0 0 1 -6.28519 -7.39434" transformations="translations" pos="260.543 653.633" stroke="darkcyan" type="label" width="10.156" height="8.203" depth="0" valign="baseline" size="large" style="math">\mathbf{A}</text>
+<text matrix="1 0 0 1 144.259 -82.9487" transformations="translations" pos="260.543 653.633" stroke="darkcyan" type="label" width="9.561" height="8.203" depth="0" valign="baseline" size="large" style="math">\mathbf{B}</text>
 </page>
 </ipe>
