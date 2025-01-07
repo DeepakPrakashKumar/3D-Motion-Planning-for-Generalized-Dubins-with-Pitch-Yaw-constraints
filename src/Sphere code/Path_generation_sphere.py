@@ -189,6 +189,8 @@ def points_path(ini_config, rL, rR, R, angle_segments, path_type = 'lgl'):
     x_coords_circles, y_coords_circles, z_coords_circles : Numpy arrays
         Contains the coordinates of points along the circles corresponding 
         to each segment of the path.
+    Tx_path, Ty_path, Tz_path : Numpy arrays
+        Contains the direction cosines of the tangent vector along the path.
 
     '''
             
@@ -201,6 +203,7 @@ def points_path(ini_config, rL, rR, R, angle_segments, path_type = 'lgl'):
     x_coords_path = []
     y_coords_path = []
     z_coords_path = []
+    Tx_path = []; Ty_path = []; Tz_path = []
     # Declaring the position array to store coordinates of points along the circles
     # corresponding to the path
     x_coords_circles = []
@@ -221,11 +224,14 @@ def points_path(ini_config, rL, rR, R, angle_segments, path_type = 'lgl'):
             
             r = rR
         
-        points_path_seg, _ = Seg_pts(ini_config_seg, angle_segments[i], r, R, path_type[i])
+        points_path_seg, tang_path_seg = Seg_pts(ini_config_seg, angle_segments[i], r, R, path_type[i])
         # Appending the obtained points to the arrays
         x_coords_path = np.append(x_coords_path, points_path_seg[:, 0])
         y_coords_path = np.append(y_coords_path, points_path_seg[:, 1])
         z_coords_path = np.append(z_coords_path, points_path_seg[:, 2])
+        Tx_path = np.append(Tx_path, tang_path_seg[:, 0])
+        Ty_path = np.append(Ty_path, tang_path_seg[:, 1])
+        Tz_path = np.append(Tz_path, tang_path_seg[:, 2])
         
         # Updating the initial configuration for the next segment to the final 
         # configuration of the considered segment of the path
@@ -242,7 +248,7 @@ def points_path(ini_config, rL, rR, R, angle_segments, path_type = 'lgl'):
     fin_config_path = ini_config_seg
     
     return x_coords_path, y_coords_path, z_coords_path, fin_config_path, x_coords_circles,\
-        y_coords_circles, z_coords_circles
+        y_coords_circles, z_coords_circles, Tx_path, Ty_path, Tz_path
         
 def modifying_initial_final_configurations_unit_sphere(ini_config, fin_config, R):
     '''
@@ -420,8 +426,8 @@ def path_generation_sphere_three_seg(ini_config, fin_config, rL, rR, R, path_typ
                 
             # Testing if the final configuration obtained from the C path is the
             # same as the desired final configuration
-            _, _, _, fin_config_path, _, _, _ =\
-                points_path(np.identity(3), rL_mod, rR_mod, 1, [phi1, phi2, phi3], path_type)
+            fin_config_path =\
+                points_path(np.identity(3), rL_mod, rR_mod, 1, [phi1, phi2, phi3], path_type)[3]
                 
             # Checking if the minimum and maximum value in the difference in the final
             # configurations is small
@@ -677,8 +683,8 @@ def path_generation_sphere_three_seg(ini_config, fin_config, rL, rR, R, path_typ
                     for phi3 in phi3_array:
                         
                         # Obtaining the final configuration of the path
-                        _, _, _, fin_config_path, _, _, _ =\
-                            points_path(np.identity(3), rL_mod, rR_mod, 1, [phi1, phi2, phi3], path_type)
+                        fin_config_path =\
+                            points_path(np.identity(3), rL_mod, rR_mod, 1, [phi1, phi2, phi3], path_type)[3]
                         
                         # print(fin_config_path)
                             
@@ -768,6 +774,8 @@ def optimal_path_sphere_three_seg(ini_config, fin_config, r, R,\
         Provides the cost of the optimal path.
     least_cost_path_params: Array
         Contains the angles of the three segments of the path.
+    x_coords, y_coords, z_coords, Tx, Ty, Tz: Arrays
+        Contains the coordinations of the path and the direction cosines of the tangent vector along the path.
     '''
     
     # Path types
@@ -795,7 +803,7 @@ def optimal_path_sphere_three_seg(ini_config, fin_config, r, R,\
                     least_cost_path_params = possible_path[1:]
 
     # Obtaining the coordinates of the path
-    x_coords_path, y_coords_path, z_coords_path, _, _, _, _ =\
+    x_coords_path, y_coords_path, z_coords_path, _, _, _, _, Tx, Ty, Tz =\
         points_path(ini_config, r, r, R, least_cost_path_params, least_cost_path)
                     
     # Plotting the optimal path
@@ -834,7 +842,7 @@ def optimal_path_sphere_three_seg(ini_config, fin_config, r, R,\
         fig_3D_copy.writing_fig_to_html(filename, 'a')
     
     return least_cost_path, least_cost_path_length, least_cost_path_params,\
-          x_coords_path, y_coords_path, z_coords_path
+          x_coords_path, y_coords_path, z_coords_path, Tx, Ty, Tz
 
 def generate_random_configs(R):
     '''
