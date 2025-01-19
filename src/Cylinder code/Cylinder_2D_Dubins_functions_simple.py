@@ -278,6 +278,9 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         q_opt = path_params_img_2[2]
         opt_fin_img = fin_config_2
         opt_path_type = path_type_img_2
+
+    ini_pos_parametrization_angle = math.atan2(ini_pos[1], ini_pos[0]) # obtaining the angle
+        # at which the initial position is present on the profile of the cylinder
     
     if visualization == 1:
         
@@ -306,8 +309,6 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
                               [fin_tang_vect[1]], [fin_tang_vect[2]], 'green', 'greens',\
                               'Final tangent vector', 5, 5, 4, 'n')
         # Adding the axes for the body frame about which the cylinder is unwrapped
-        ini_pos_parametrization_angle = math.atan2(ini_pos[1], ini_pos[0]) # obtaining the angle
-        # at which the initial position is present on the profile of the cylinder
         fig_cylinder.arrows_3D([ini_pos[0]], [ini_pos[1]], [ini_pos[2]],\
                                [-math.sin(ini_pos_parametrization_angle)],\
                                [math.cos(ini_pos_parametrization_angle)], [0],\

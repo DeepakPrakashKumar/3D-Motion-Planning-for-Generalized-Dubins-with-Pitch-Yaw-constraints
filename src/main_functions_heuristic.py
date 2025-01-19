@@ -36,6 +36,11 @@ from Plane_Dubins_functions import optimal_dubins_path
 # Returning to initial directory
 os.chdir(cwd)
 
+# Importing code for sphere-cylinder-sphere, sphere-plane-sphere, and sphere-sphere-sphere setups
+from sphere_cylinder_sphere_function import *
+from sphere_plane_sphere_path_function import *
+from sphere_sphere_sphere_path_function import *
+
 def generate_random_configs_3D(xlim, ylim, zlim):
     '''
     This function generates a random configuration in the 3D space given the limits
@@ -84,39 +89,6 @@ def generate_random_configs_3D(xlim, ylim, zlim):
     
     return config
 
-def config_sphere(loc_3d, loc_center_sphere, tang_sphere):
-    '''
-    In this function, a rotation matrix is constructed for the sphere considering
-    the global frame to be shifted to the center of the sphere.
-    
-    Parameters
-    ----------
-    loc_3d : Array
-        Contains the location in 3D in the global frame.
-    loc_center_sphere : Array
-        Contains the location in 3D of the center of the considered sphere in the
-        global frame.
-    tang_sphere : Array
-        Contains the direction cosines of the unit vector corresponding to the tangent
-        vector represented in the global frame.
-    
-    Returns
-    -------
-    R : 3x3 matrix
-        Contains the rotation matrix corresponding to the configuration on the sphere.
-
-    '''
-
-    # Computing the location with respect to the center of the sphere
-    loc_sphere = loc_3d - loc_center_sphere
-    # Compute the tangent-normal
-    tang_norm = np.cross(loc_sphere, tang_sphere)/np.linalg.norm(np.cross(loc_sphere, tang_sphere))
-    R = np.array([[loc_sphere[0], tang_sphere[0], tang_norm[0]],\
-                  [loc_sphere[1], tang_sphere[1], tang_norm[1]],\
-                  [loc_sphere[2], tang_sphere[2], tang_norm[2]]])
-    
-    return R
-
 def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
                                          visualization = 1, filename = "temp.html"):
     '''
@@ -154,9 +126,9 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
 
     '''
     
+    print('Computing feasible paths through different surfaces.')
     # Computing the center of the inner and outer spheres at the initial and final
-    # configurations
-    
+    # configurations    
     ini_loc_inner_sp = ini_config[0, :] + R*ini_config[3, :]
     ini_loc_outer_sp = ini_config[0, :] - R*ini_config[3, :]
     fin_loc_inner_sp = fin_config[0, :] + R*fin_config[3, :]
@@ -179,10 +151,10 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
     axis_oi = (fin_loc_inner_sp - ini_loc_outer_sp)/np.linalg.norm(fin_loc_inner_sp - ini_loc_outer_sp)
     ht_oi = np.linalg.norm(fin_loc_inner_sp - ini_loc_outer_sp)
     
-    if visualization == 1:
+    # Creating a plotly figure environment
+    plot_figure_configs = plotting_functions()
 
-        # Creating a plotly figure environment
-        plot_figure_configs = plotting_functions()
+    if visualization == 1:
 
         # Showing the initial and final points
         plot_figure_configs.points_3D([ini_config[0, 0]], [ini_config[0, 1]], [ini_config[0, 2]],\
@@ -215,16 +187,55 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
         plot_figure_configs.writing_fig_to_html(filename, 'w')
         
     # We now construct the best feasible path connecting the two inner spheres and the two outer spheres
+    print('Considering path construction through cylindrical envelope connecting pair of inner spheres.')
     min_dist_cyc_inner, points_global_cyc_inner, tang_global_cyc_inner, tang_normal_global_cyc_inner, surf_normal_global_cyc_inner =\
      Path_generation_sphere_cylinder_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_inner_sp, r, R, axis_ii, ht_ii, disc_no,\
-                                            plot_figure_configs, 1, filename, 'inner')
+                                            plot_figure_configs, visualization, filename, 'inner', 0)
+    
+    print('Considering path construction through cylindrical envelope connecting pair of outer spheres.')
     min_dist_cyc_outer, points_global_cyc_outer, tang_global_cyc_outer, tang_normal_global_cyc_outer, surf_normal_global_cyc_outer =\
      Path_generation_sphere_cylinder_sphere(ini_config, fin_config, ini_loc_outer_sp, fin_loc_outer_sp, r, R, axis_oo, ht_oo, disc_no,\
-                                            plot_figure_configs, 1, filename, 'outer')
+                                            plot_figure_configs, visualization, filename, 'outer', 0)
         
-    # We now construct the best feasible path connecting the two cross-tangent spheres
-    Path_generation_sphere_plane_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_outer_sp,\
-                                           r, R, axis_io, ht_io, disc_no, plot_figure_configs, 1, filename)
+    # # We now construct the best feasible path connecting the two cross-tangent spheres
+    # print('Considering path construction through cross-tangent plane connecting inner sphere at initial location and outer sphere at final location.')
+    # min_dist_plane_inner_outer, points_global_inner_outer = Path_generation_sphere_plane_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_outer_sp,\
+    #                                        r, R, axis_io, ht_io, disc_no, plot_figure_configs, visualization, filename, 0)
+    
+    # print('Considering path construction through cross-tangent plane connecting outer sphere at initial location and inner sphere at final location.')
+    # min_dist_plane_outer_inner, points_global_outer_inner = Path_generation_sphere_plane_sphere(ini_config, fin_config, ini_loc_outer_sp, fin_loc_inner_sp,\
+    #                                        r, R, axis_oi, ht_oi, disc_no, plot_figure_configs, visualization, filename, 0)
 
-    # We perform the connections through three sphere setup as well.
+    # # We perform the connections through three sphere setup as well.
+    # print('Considering path construction connecting inner spheres at initial and final configurations through an intermediary sphere.')
+    # min_dist_inner_spheres, points_global_inner_spheres = Path_generation_sphere_sphere_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_inner_sp,\
+    #                                        r, R, axis_ii, ht_ii, disc_no, plot_figure_configs, visualization, filename, 0)
+    
+    # print('Considering path construction connecting outer spheres at initial and final configurations through an intermediary sphere.')
+    # min_dist_outer_spheres, points_global_outer_spheres = Path_generation_sphere_sphere_sphere(ini_config, fin_config, ini_loc_outer_sp, fin_loc_outer_sp,\
+    #                                        r, R, axis_oo, ht_oo, disc_no, plot_figure_configs, visualization, filename, 0)
+    
+    # Obtaining the minimum distance path among the considered paths
+    # min_dist_path_ind = np.argmin([min_dist_cyc_inner, min_dist_cyc_outer, min_dist_plane_inner_outer,\
+    #                                 min_dist_plane_outer_inner, min_dist_inner_spheres, min_dist_outer_spheres])
+    
+    # min_dist_path = [min_dist_cyc_inner, min_dist_cyc_outer, min_dist_plane_inner_outer,\
+    #                                 min_dist_plane_outer_inner, min_dist_inner_spheres, min_dist_outer_spheres][min_dist_path_ind]
+    # min_dist_path_pts = [points_global_cyc_inner, points_global_cyc_outer, points_global_inner_outer,\
+    #                 points_global_outer_inner, points_global_inner_spheres, points_global_outer_spheres][min_dist_path_ind]
 
+    # path_type = ['cyc_inner', 'cyc_outer', 'plane_inner_outer', 'plane_outer_inner', 'spheres_inner', 'spheres_outer'][min_dist_path_ind]
+
+    min_dist_path_ind = np.argmin([min_dist_cyc_inner, min_dist_cyc_outer])
+    
+    min_dist_path = [min_dist_cyc_inner, min_dist_cyc_outer][min_dist_path_ind]
+    min_dist_path_pts = [points_global_cyc_inner, points_global_cyc_outer][min_dist_path_ind]
+
+    path_type = ['cyc_inner', 'cyc_outer'][min_dist_path_ind]
+
+    # Obtaining the tangent vector, tangent normal vector, and surface normal vector as well
+    tang_global_path = [tang_global_cyc_inner, tang_global_cyc_outer][min_dist_path_ind]
+    tang_normal_global_path = [tang_normal_global_cyc_inner, tang_normal_global_cyc_outer][min_dist_path_ind]
+    surf_normal_global_path = [surf_normal_global_cyc_inner, surf_normal_global_cyc_outer][min_dist_path_ind]
+    
+    return min_dist_path, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type

@@ -734,7 +734,7 @@ def path_generation_sphere_three_seg(ini_config, fin_config, rL, rR, R, path_typ
             # Checking if no solution was obtained for the path
             if len(path_params) == 0:
                 
-                print(path_type.upper() + ' path does not exist.')
+                # print(path_type.upper() + ' path does not exist.')
                 path_params.append([np.NaN, np.NaN, np.NaN, np.NaN, np.NaN])
                 
     return path_params

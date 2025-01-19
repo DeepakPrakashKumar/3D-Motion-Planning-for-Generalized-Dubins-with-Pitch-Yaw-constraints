@@ -294,7 +294,7 @@ def CSC_path(ini_config, fin_config, r, path_type = 'lsl'):
     # Checking if the path exists
     if lS2 < 0:
         
-        print(path_type.upper() + ' path does not exist.')
+        # print(path_type.upper() + ' path does not exist.')
         path_length = np.NaN
         phi_1 = np.NaN
         lS = np.NaN
@@ -490,7 +490,7 @@ def CCC_path(ini_config, fin_config, r, path_type = 'lrl'):
     # Checking if the path exists
     if abs(cos_phi_2) > 1:
         
-        print(path_type.upper() + ' path does not exist.')
+        # print(path_type.upper() + ' path does not exist.')
         path_length = np.NaN
         phi_1 = np.NaN
         phi_2 = np.NaN
