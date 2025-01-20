@@ -93,7 +93,9 @@ import math
 import numpy as np
 
 fig = plt.figure()
-ax = fig.gca(projection='3d')
+# ax = Axes3D(fig)
+ax = fig.add_subplot(projection='3d')
+# ax = fig.gca(projection='3d')
 viewers = ViewManager(ax, animation=True, video=False, video_name = 'trajectory_aircraft.mp4')
 
 # Constructing an array for the vehicle to track

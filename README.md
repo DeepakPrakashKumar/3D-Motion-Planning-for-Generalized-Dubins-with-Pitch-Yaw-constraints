@@ -9,3 +9,4 @@ pip install opencv-python
 <!-- pip install pyqtgraph
 pip install PyQt6 -->
 pip3 install Pillow
+pip install matplotlib (tested on versions 3.5.3, 3.7.2)
