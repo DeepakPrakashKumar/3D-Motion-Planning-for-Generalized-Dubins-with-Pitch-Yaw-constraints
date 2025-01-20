@@ -10,7 +10,7 @@ from video_writer import VideoWriter
 from msg_state import MsgState
 
 class ViewManager:
-    def __init__(self, 
+    def __init__(self, fig,
                  video: bool=False, 
                  animation: bool=False,
                  video_name: str=[],
@@ -26,17 +26,18 @@ class ViewManager:
                 output_rate = ts_video)
         # initialize the other visualization
         if self.animation_flag: 
-            self.app = pg.QtWidgets.QApplication([]) 
+            # self.app = pg.QtWidgets.QApplication([]) 
             if self.animation_flag:
-                self.mav_view = MavViewer(app=self.app)
+                # self.mav_view = MavViewer(app=self.app)
+                self.mav_view = MavViewer(fig)
 
     def update(self,
                sim_time: float,
                true_state: MsgState=None):
         if self.animation_flag: 
             self.mav_view.update(true_state)
-        if self.animation_flag or self.data_plot_flag or self.sensor_plot_flag: 
-            self.app.processEvents()
+        # if self.animation_flag or self.data_plot_flag or self.sensor_plot_flag: 
+        #     self.app.processEvents()
         if self.video_flag is True: 
             self.video.update(sim_time)
 

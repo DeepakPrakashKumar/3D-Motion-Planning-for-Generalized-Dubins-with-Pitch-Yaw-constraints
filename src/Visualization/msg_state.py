@@ -15,10 +15,20 @@ class MsgState:
     def __init__(self):
         self.north = 0.      # inertial north position in meters
         self.east = 0.      # inertial east position in meters
-        self.altitude = 100.       # inertial altitude in meters
-        self.phi = 0.     # roll angle in radians
-        self.theta = 0.   # pitch angle in radians
-        self.psi = 0.     # yaw angle in radians
+        self.altitude = 100.       # inertial altitude in 
+        # Specifying components of rotation matrix
+        self.r11 = 1.
+        self.r12 = 0.
+        self.r13 = 0.
+        self.r21 = 0.   
+        self.r22 = 1.   
+        self.r23 = 0.   
+        self.r31 = 0.   
+        self.r32 = 0.   
+        self.r33 = 1.
+        # self.phi = 0.     # roll angle in radians
+        # self.theta = 0.   # pitch angle in radians
+        # self.psi = 0.     # yaw angle in radians
         self.Va = 25.      # airspeed in meters/sec
         self.alpha = 0.   # angle of attack in radians
         self.beta = 0.    # sideslip angle in radians

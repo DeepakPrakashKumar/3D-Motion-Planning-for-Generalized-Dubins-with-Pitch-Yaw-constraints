@@ -68,7 +68,7 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
     ax = fig.add_subplot(projection='3d')
 
     # Setting up an object for visualizing the aircraft
-    viewers = ViewManager(animation=True, video=False, video_name = 'trajectory_aircraft.mp4')
+    viewers = ViewManager(ax, animation=True, video=False, video_name = 'trajectory_aircraft.mp4')
 
     # We define the length of the arrow for representing the orientation
     length = 3
