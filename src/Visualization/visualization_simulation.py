@@ -66,7 +66,7 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
                      ygrid_size = [-20, 20], zgrid_size = [-20, 20], length_vec_orientation = 5, scale_aircraft = 3):
     # In this function, the trajectory is visualized and is animated.
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12,10))
     ax = fig.add_subplot(projection='3d')
 
     # Setting up an object for visualizing the aircraft
@@ -75,9 +75,25 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
     # We define the length of the arrow for representing the orientation
     length = length_vec_orientation
 
-    ax.scatter(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], marker = 'o', linewidth = 1.5,\
+    # We also plot the spheres at the initial configuration
+    if path_type in ['cyc_inner', 'plane_inner_outer', 'spheres_inner']:
+        xini_inner, yini_inner, zini_inner = generate_points_sphere([ini_config[0, i] + R*ini_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xini_inner, yini_inner, zini_inner, color = 'orange', alpha=0.4)
+    else:
+        xini_outer, yini_outer, zini_outer = generate_points_sphere([ini_config[0, i] - R*ini_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xini_outer, yini_outer, zini_outer, color = 'magenta', alpha=0.4)
+
+    # We also plot the spheres at the final configuration
+    if path_type in ['cyc_inner', 'plane_outer_inner', 'spheres_inner']:
+        xfin_inner, yfin_inner, zfin_inner = generate_points_sphere([fin_config[0, i] + R*fin_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xfin_inner, yfin_inner, zfin_inner, color = 'orange', alpha=0.4)
+    else:
+        xfin_outer, yfin_outer, zfin_outer = generate_points_sphere([fin_config[0, i] - R*fin_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xfin_outer, yfin_outer, zfin_outer, color = 'magenta', alpha=0.4)
+
+    ax.scatter(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], marker = 'o', s = 50, linewidth = 1.5,\
             color = 'r', label = 'Initial point')
-    ax.scatter(fin_config[0, 0], fin_config[0, 1], fin_config[0, 2], marker = 'D', linewidth = 1.5,\
+    ax.scatter(fin_config[0, 0], fin_config[0, 1], fin_config[0, 2], marker = 'D', s = 50, linewidth = 1.5,\
             color = 'b', label = 'Final point')
     # We plot the orientation of the vehicle as well
     ax.arrow3D(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], length*ini_config[1, 0],\
@@ -93,7 +109,7 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
     ax.arrow3D(fin_config[0, 0], fin_config[0, 1], fin_config[0, 2], length*fin_config[3, 0],\
                 length*fin_config[3, 1], length*fin_config[3, 2], mutation_scale=20, fc='green')
 
-    ax.plot3D(pos_global[:, 0], pos_global[:, 1], pos_global[:, 2], linewidth = 1.5, label = 'Trajectory')
+    ax.plot3D(pos_global[:, 0], pos_global[:, 1], pos_global[:, 2], linewidth = 2.5, color = 'k', label = 'Trajectory')
     
     ax.set_xlabel('X', fontsize = 12)
     ax.set_ylabel('Y', fontsize = 12)
@@ -103,21 +119,6 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
     ax.set_ylim(ygrid_size[0], ygrid_size[1])
     ax.set_zlim(zgrid_size[0], zgrid_size[1])
 
-    # We also plot the spheres at the initial configuration
-    if path_type in ['cyc_inner', 'plane_inner_outer', 'spheres_inner']:
-        xini_inner, yini_inner, zini_inner = generate_points_sphere([ini_config[0, i] + R*ini_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xini_inner, yini_inner, zini_inner, color = 'orange', alpha=0.2)
-    else:
-        xini_outer, yini_outer, zini_outer = generate_points_sphere([ini_config[0, i] - R*ini_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xini_outer, yini_outer, zini_outer, color = 'magenta', alpha=0.2)
-
-    # We also plot the spheres at the final configuration
-    if path_type in ['cyc_inner', 'plane_outer_inner', 'spheres_inner']:
-        xfin_inner, yfin_inner, zfin_inner = generate_points_sphere([fin_config[0, i] + R*fin_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xfin_inner, yfin_inner, zfin_inner, color = 'orange', alpha=0.2)
-    else:
-        xfin_outer, yfin_outer, zfin_outer = generate_points_sphere([fin_config[0, i] - R*fin_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xfin_outer, yfin_outer, zfin_outer, color = 'magenta', alpha=0.2)
 
     ax.legend(fontsize = 9, loc = 1)
 
@@ -132,7 +133,8 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
             tangplot.remove()
             tangnorm_plot.remove()
             surfplot.remove()
-            
+        
+        # if np.mod(i, 10) == 0:
         # We plot the current configuration
         locplot = ax.scatter(pos_global[i, 0], pos_global[i, 1], pos_global[i, 2], marker = 'o', linewidth = 1.5,\
             color = 'k')
@@ -179,6 +181,12 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
             time.time(),
             true_state = true_state,  # true states
         )
+        
+        # ax.set_xlim(pos_global[i, 0] - 2, pos_global[i, 0] + 2)
+        # ax.set_ylim(pos_global[i, 1] - 1.5, pos_global[i, 1] + 1.5)
+        # ax.set_zlim(pos_global[i, 2] - 1.5, pos_global[i, 2] + 1.5)
+
+        # ax.view_init(elev = pitch_angle, azim = yaw_angle, roll=0)
 
         # print('Printing the ', i, 'th point')
         plt.pause(.05)

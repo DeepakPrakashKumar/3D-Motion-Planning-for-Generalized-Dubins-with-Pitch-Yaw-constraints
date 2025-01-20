@@ -189,11 +189,11 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
         # Writing the figure on the html file
         plot_figure_configs.writing_fig_to_html(filename, 'w')
         
-    # We now construct the best feasible path connecting the two inner spheres and the two outer spheres
-    print('Considering path construction through cylindrical envelope connecting pair of inner spheres.')
-    min_dist_cyc_inner, points_global_cyc_inner, tang_global_cyc_inner, tang_normal_global_cyc_inner, surf_normal_global_cyc_inner =\
-     Path_generation_sphere_cylinder_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_inner_sp, r, R, axis_ii, ht_ii, disc_no,\
-                                            plot_figure_configs, visualization, filename, 'inner', 0)
+    # # We now construct the best feasible path connecting the two inner spheres and the two outer spheres
+    # print('Considering path construction through cylindrical envelope connecting pair of inner spheres.')
+    # min_dist_cyc_inner, points_global_cyc_inner, tang_global_cyc_inner, tang_normal_global_cyc_inner, surf_normal_global_cyc_inner =\
+    #  Path_generation_sphere_cylinder_sphere(ini_config, fin_config, ini_loc_inner_sp, fin_loc_inner_sp, r, R, axis_ii, ht_ii, disc_no,\
+    #                                         plot_figure_configs, visualization, filename, 'inner', 0)
     
     print('Considering path construction through cylindrical envelope connecting pair of outer spheres.')
     min_dist_cyc_outer, points_global_cyc_outer, tang_global_cyc_outer, tang_normal_global_cyc_outer, surf_normal_global_cyc_outer =\
@@ -229,16 +229,19 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r, R, disc_no,\
 
     # path_type = ['cyc_inner', 'cyc_outer', 'plane_inner_outer', 'plane_outer_inner', 'spheres_inner', 'spheres_outer'][min_dist_path_ind]
 
-    min_dist_path_ind = np.argmin([min_dist_cyc_inner, min_dist_cyc_outer])
+    # min_dist_path_ind = np.argmin([min_dist_cyc_inner, min_dist_cyc_outer])
     
-    min_dist_path = [min_dist_cyc_inner, min_dist_cyc_outer][min_dist_path_ind]
-    min_dist_path_pts = [points_global_cyc_inner, points_global_cyc_outer][min_dist_path_ind]
+    # min_dist_path = [min_dist_cyc_inner, min_dist_cyc_outer][min_dist_path_ind]
+    # min_dist_path_pts = [points_global_cyc_inner, points_global_cyc_outer][min_dist_path_ind]
 
-    path_type = ['cyc_inner', 'cyc_outer'][min_dist_path_ind]
+    # path_type = ['cyc_inner', 'cyc_outer'][min_dist_path_ind]
 
-    # Obtaining the tangent vector, tangent normal vector, and surface normal vector as well
-    tang_global_path = [tang_global_cyc_inner, tang_global_cyc_outer][min_dist_path_ind]
-    tang_normal_global_path = [tang_normal_global_cyc_inner, tang_normal_global_cyc_outer][min_dist_path_ind]
-    surf_normal_global_path = [surf_normal_global_cyc_inner, surf_normal_global_cyc_outer][min_dist_path_ind]
+    # # Obtaining the tangent vector, tangent normal vector, and surface normal vector as well
+    # tang_global_path = [tang_global_cyc_inner, tang_global_cyc_outer][min_dist_path_ind]
+    # tang_normal_global_path = [tang_normal_global_cyc_inner, tang_normal_global_cyc_outer][min_dist_path_ind]
+    # surf_normal_global_path = [surf_normal_global_cyc_inner, surf_normal_global_cyc_outer][min_dist_path_ind]
+
+    min_dist_path = min_dist_cyc_outer; min_dist_path_pts = points_global_cyc_outer; path_type = 'cyc_outer'
+    tang_global_path = tang_global_cyc_outer; tang_normal_global_path = tang_normal_global_cyc_outer; surf_normal_global_path = surf_normal_global_cyc_outer
     
     return min_dist_path, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type

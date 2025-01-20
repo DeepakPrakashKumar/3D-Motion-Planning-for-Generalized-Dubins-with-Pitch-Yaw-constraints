@@ -48,4 +48,4 @@ print('Tangent vectors for the path are:\n', tang_global_path)
 
 # We now simulate the motion of a vehicle along the path that we have obtained.
 plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R,\
-                 xgrid_size = [-xlim/2, xlim/2], ygrid_size = [-ylim/2, ylim/2], zgrid_size = [-zlim/2, zlim/2], length_vec_orientation = 5, scale_aircraft = 2.0)
+                 xgrid_size = [-xlim/2, xlim/2], ygrid_size = [-ylim/2, ylim/2], zgrid_size = [-zlim/2, zlim/2], length_vec_orientation = 10, scale_aircraft = 2.0)
