@@ -7,6 +7,7 @@ import os
 import sys
 from msg_state import MsgState
 import time
+import math
 
 # # Including the following command to ensure that python is able to find the relevant files afer changing directory
 # sys.path.insert(0, '')
@@ -61,17 +62,18 @@ def _arrow3D(ax, x, y, z, dx, dy, dz, *args, **kwargs):
 setattr(Axes3D, 'arrow3D', _arrow3D)
 
 def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_normal_global_path,\
-                     surf_normal_global_path, path_type, R):
+                     surf_normal_global_path, path_type, R, xgrid_size = [-20, 20],\
+                     ygrid_size = [-20, 20], zgrid_size = [-20, 20], length_vec_orientation = 5, scale_aircraft = 3):
     # In this function, the trajectory is visualized and is animated.
 
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
     # Setting up an object for visualizing the aircraft
-    viewers = ViewManager(ax, animation=True, video=False, video_name = 'trajectory_aircraft.mp4')
+    viewers = ViewManager(ax, animation=True, video=False, scale_aircraft=scale_aircraft, video_name = 'trajectory_aircraft.mp4')
 
     # We define the length of the arrow for representing the orientation
-    length = 3
+    length = length_vec_orientation
 
     ax.scatter(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], marker = 'o', linewidth = 1.5,\
             color = 'r', label = 'Initial point')
@@ -96,6 +98,10 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
     ax.set_xlabel('X', fontsize = 12)
     ax.set_ylabel('Y', fontsize = 12)
     ax.set_zlabel('Z', fontsize = 12)
+
+    ax.set_xlim(xgrid_size[0], xgrid_size[1])
+    ax.set_ylim(ygrid_size[0], ygrid_size[1])
+    ax.set_zlim(zgrid_size[0], zgrid_size[1])
 
     # We also plot the spheres at the initial configuration
     if path_type in ['cyc_inner', 'plane_inner_outer', 'spheres_inner']:
@@ -140,7 +146,33 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
         # We update the state of the aircraft
         true_state.north = pos_global[i, 0]
         true_state.east = pos_global[i, 1]
-        true_state.altitude = pos_global[i, 2]
+        true_state.altitude = -pos_global[i, 2]
+
+        # We compute the orientation of the aircraft
+        # Calculating the angles. The net rotation matrix is given below. Here, psi is yaw angle, theta is pitch, and phi is roll angle.
+        """cψcθ −sψcφ + cψsθsφ sψsφ + cψsθcφ
+        sψcθ cψcφ + sψsθsφ −cψsφ + sψsθcφ
+        −sθ cθsφ cθcφ"""
+
+        if math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2) <= 10**(-8):
+            
+            pitch_angle = [-np.sign(tang_global_path[i][2])*math.pi/2]
+            # We set roll angle to be zero
+            roll_angle = 0.0
+            yaw_angle = math.atan2(-tang_normal_global_path[i][0], tang_normal_global_path[i][1])
+
+        else:
+
+            pitch_angle = math.atan2(-tang_global_path[i][2], math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2))
+            yaw_angle = math.atan2(tang_global_path[i][1], tang_global_path[i][0])
+            roll_angle = math.atan2(surf_normal_global_path[i][2], surf_normal_global_path[i][2])
+
+        # true_state.psi = yaw_angle[i]
+        # true_state.theta = pitch_angle[i]
+        # true_state.phi = roll_angle[i]
+        true_state.psi = yaw_angle
+        true_state.theta = pitch_angle
+        true_state.phi = roll_angle
 
         # Plotting the aircraft
         viewers.update(

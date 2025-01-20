@@ -5,15 +5,18 @@
 import os
 import sys
 from main_functions_heuristic import generate_random_configs_3D, Dubins_3D_numerical_path_on_surfaces
+from pathlib import Path
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
 # Obtaining the current directory
 cwd = os.getcwd()
+current_directory = Path(__file__).parent
+path_str = str(current_directory)
 
 # Importing code for plotting
 rel_path = '\Visualization'
-os.chdir(cwd + rel_path)
+os.chdir(path_str + rel_path)
 from visualization_simulation import plot_trajectory
 
 # Returning to initial directory
@@ -44,4 +47,5 @@ min_dist_path_length, min_dist_path_pts, tang_global_path, tang_normal_global_pa
 print('Tangent vectors for the path are:\n', tang_global_path)
 
 # We now simulate the motion of a vehicle along the path that we have obtained.
-plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R)
+plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R,\
+                 xgrid_size = [-xlim/2, xlim/2], ygrid_size = [-ylim/2, ylim/2], zgrid_size = [-zlim/2, zlim/2], length_vec_orientation = 5, scale_aircraft = 2.0)

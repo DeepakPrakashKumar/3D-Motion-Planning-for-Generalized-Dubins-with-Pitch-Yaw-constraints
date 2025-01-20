@@ -20,7 +20,7 @@ path_str = str(current_directory)
 # cwd = os.getcwd()
 
 class DrawMav:
-    def __init__(self, state, ax, scale=10):
+    def __init__(self, state, ax, scale = 4):
         """
         Draw the MAV.
 
@@ -38,10 +38,10 @@ class DrawMav:
 
         mav_position = np.array([[state.north], [state.east], [-state.altitude]])  # NED coordinates
         # attitude of mav as a rotation matrix R from body to inertial
-        # R_bi = euler_to_rotation(state.phi, state.theta, state.psi)
-        R_bi = np.array([[state.r11, state.r12, state.r13],\
-                         [state.r21, state.r22, state.r23],\
-                         [state.r31, state.r32, state.r33]])
+        R_bi = euler_to_rotation(state.phi, state.theta, state.psi)
+        # R_bi = np.array([[state.r11, state.r12, state.r13],\
+        #                  [state.r21, state.r22, state.r23],\
+        #                  [state.r31, state.r32, state.r33]])
         # convert North-East Down to East-North-Up for rendering
         # self.R_ned = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
         # self.R_ned = np.eye(3)
@@ -65,10 +65,10 @@ class DrawMav:
     def update(self, state):
         mav_position = np.array([[state.north], [state.east], [-state.altitude]])  # NED coordinates
         # attitude of mav as a rotation matrix R from body to inertial
-        # R_bi = euler_to_rotation(state.phi, state.theta, state.psi)
-        R_bi = np.array([[state.r11, state.r12, state.r13],\
-                         [state.r21, state.r22, state.r23],\
-                         [state.r31, state.r32, state.r33]])
+        R_bi = euler_to_rotation(state.phi, state.theta, state.psi)
+        # R_bi = np.array([[state.r11, state.r12, state.r13],\
+        #                  [state.r21, state.r22, state.r23],\
+        #                  [state.r31, state.r32, state.r33]])
 
         # Rotate and translate points
         transformed_points = self.rotate_points(self.mav_points, self.R_ned)

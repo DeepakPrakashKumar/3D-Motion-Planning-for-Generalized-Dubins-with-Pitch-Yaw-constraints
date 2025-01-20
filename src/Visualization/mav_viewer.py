@@ -15,8 +15,8 @@ from draw_mav_stl_matplotlib import DrawMav
 from time import time
 
 class MavViewer():
-    def __init__(self, fig, ts_refresh=1./30.):
-        self.scale = 100
+    def __init__(self, fig, scale_aircraft = 3.0, ts_refresh=1./30.):
+        self.scale = scale_aircraft
         # initialize Qt gui application and window
 #         self.app = app  # initialize QT, external so that only one QT process is running
 #         self.window = gl.GLViewWidget()  # initialize the view object
@@ -47,7 +47,7 @@ class MavViewer():
     def update(self, state):
         # initialize the drawing the first time update() is called
         if not self.plot_initialized:
-            self.mav_plot = DrawMav(state, self.fig)
+            self.mav_plot = DrawMav(state, self.fig, self.scale)
             self.plot_initialized = True
         # else update drawing on all other calls to update()
         else:

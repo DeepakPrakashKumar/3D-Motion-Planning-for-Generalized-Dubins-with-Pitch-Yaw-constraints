@@ -6,17 +6,20 @@ import sys
 from math import cos as cos
 from math import sin as sin
 from math import sqrt as sqrt
+from pathlib import Path
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
 # Obtaining the current directory
 cwd = os.getcwd()
+current_directory = Path(__file__).parent
+path_str = str(current_directory)
 
 from sphere_cylinder_sphere_function import config_sphere
 
 # Importing code for the sphere
 rel_path = '\Sphere code'
-os.chdir(cwd + rel_path)
+os.chdir(path_str + rel_path)
 from Path_generation_sphere import optimal_path_sphere_three_seg, generate_points_sphere
 
 # Returning to initial directory

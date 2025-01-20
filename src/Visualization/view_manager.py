@@ -14,7 +14,8 @@ class ViewManager:
                  video: bool=False, 
                  animation: bool=False,
                  video_name: str=[],
-                 ts_video: float=0.1):
+                 ts_video: float=0.1,
+                 scale_aircraft: float = 3.0):
         self.video_flag = video
         self.animation_flag = animation
         # initialize video 
@@ -29,7 +30,7 @@ class ViewManager:
             # self.app = pg.QtWidgets.QApplication([]) 
             if self.animation_flag:
                 # self.mav_view = MavViewer(app=self.app)
-                self.mav_view = MavViewer(fig)
+                self.mav_view = MavViewer(fig, scale_aircraft)
 
     def update(self,
                sim_time: float,
