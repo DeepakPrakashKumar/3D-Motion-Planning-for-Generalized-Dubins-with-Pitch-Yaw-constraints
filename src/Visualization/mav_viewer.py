@@ -8,8 +8,8 @@ mavsim_python: mav viewer (for chapter 2)
         7/13/2023 - RWB
         3/25/2024 - Carson Moon
 """
-import pyqtgraph.opengl as gl
-import pyqtgraph.Vector as Vector
+# import pyqtgraph.opengl as gl
+# import pyqtgraph.Vector as Vector
 # from viewers.draw_mav import DrawMav
 from draw_mav_stl_matplotlib import DrawMav
 from time import time
@@ -57,7 +57,7 @@ class MavViewer():
             # self.t = t
             # self.t_next = t + self.ts_refresh
         # update the center of the camera view to the mav location
-        view_location = Vector(state.east, state.north, state.altitude)  # defined in ENU coordinates
+        # view_location = Vector(state.east, state.north, state.altitude)  # defined in ENU coordinates
         # self.window.opts['center'] = view_location
         # redraw
     

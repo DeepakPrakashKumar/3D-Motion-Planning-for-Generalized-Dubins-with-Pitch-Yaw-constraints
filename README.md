@@ -6,3 +6,6 @@ Repository contains the code for generating feasible solutions for 3D Dubins pro
 
 pip install numpy-stl
 pip install opencv-python
+<!-- pip install pyqtgraph
+pip install PyQt6 -->
+pip3 install Pillow

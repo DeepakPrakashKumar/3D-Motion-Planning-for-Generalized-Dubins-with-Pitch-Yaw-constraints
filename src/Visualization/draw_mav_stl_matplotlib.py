@@ -11,9 +11,13 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from stl import mesh
 import os
 from rotations import euler_to_rotation
+from pathlib import Path
 
-# Obtaining the current directory
-cwd = os.getcwd()
+current_directory = Path(__file__).parent
+path_str = str(current_directory)
+
+# # Obtaining the current directory
+# cwd = os.getcwd()
 
 class DrawMav:
     def __init__(self, state, ax, scale=10):
@@ -45,7 +49,7 @@ class DrawMav:
         self.R_ned = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
 
         # get STL mesh
-        stl_mesh = mesh.Mesh.from_file(cwd + '/aircraft1.stl')
+        stl_mesh = mesh.Mesh.from_file(path_str + '/aircraft1.stl')
         self.mav_points = self.unit_length * stl_mesh.points.reshape(-1, 3)
         self.mav_faces = np.arange(self.mav_points.shape[0]).reshape(-1, 3)
 
@@ -82,6 +86,7 @@ class DrawMav:
 
     def update_object(self, object, points):
         """Update the MAV object in the Matplotlib plot."""
+        # print("Points for updation are ", points)
         object.set_verts(points)
         self.ax.figure.canvas.draw_idle()
 

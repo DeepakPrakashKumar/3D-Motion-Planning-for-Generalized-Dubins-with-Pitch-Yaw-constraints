@@ -93,7 +93,7 @@ import math
 import numpy as np
 
 fig = plt.figure()
-ax = fig.add_subplot(projection='3d')
+ax = fig.gca(projection='3d')
 viewers = ViewManager(ax, animation=True, video=False, video_name = 'trajectory_aircraft.mp4')
 
 # Constructing an array for the vehicle to track
@@ -103,7 +103,7 @@ tang_normal_path = [[-1/math.sqrt(2), 1/math.sqrt(2), 0] for i in range(50)]
 surf_normal_path = [np.cross(tang_global_path[i], tang_normal_path[i]) for i in range(50)]
 true_state = MsgState()
 
-# print(pos_global)
+print([pos_global[i][0] for i in range(len(pos_global))])
 
 ax.plot3D([pos_global[i][0] for i in range(len(pos_global))],\
           [pos_global[i][1] for i in range(len(pos_global))],\

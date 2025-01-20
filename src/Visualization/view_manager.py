@@ -4,7 +4,7 @@ mavsim: manage_viewers
     - Update history:
         3/11/2024 - RWB
 """
-import pyqtgraph as pg
+# import pyqtgraph as pg
 from mav_viewer import MavViewer
 from video_writer import VideoWriter
 from msg_state import MsgState
