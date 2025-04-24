@@ -8,6 +8,9 @@ import sys
 from msg_state import MsgState
 import time
 import math
+from rotations import euler_to_rotation
+
+plt.rcParams['text.usetex'] = True
 
 # # Including the following command to ensure that python is able to find the relevant files afer changing directory
 # sys.path.insert(0, '')
@@ -63,33 +66,70 @@ setattr(Axes3D, 'arrow3D', _arrow3D)
 
 def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_normal_global_path,\
                      surf_normal_global_path, path_type, R, xgrid_size = [-20, 20],\
-                     ygrid_size = [-20, 20], zgrid_size = [-20, 20], length_vec_orientation = 5, scale_aircraft = 3):
+                     ygrid_size = [-20, 20], zgrid_size = [-20, 20], length_vec_orientation = 5,\
+                     scale_aircraft = 3, elev = False, azim = False, video_name = False):
     # In this function, the trajectory is visualized and is animated.
 
-    fig = plt.figure(figsize=(12,10))
+    fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
 
+    plt.ion()
+
+    plt.tight_layout()
+
     # Setting up an object for visualizing the aircraft
-    viewers = ViewManager(ax, animation=True, video=False, scale_aircraft=scale_aircraft, video_name = 'trajectory_aircraft.mp4')
+    if video_name != False:
+        viewers = ViewManager(ax, animation=True, video=True, scale_aircraft=scale_aircraft, video_name = video_name)
+    else:
+        viewers = ViewManager(ax, animation=True, video=False, scale_aircraft=scale_aircraft, video_name = 'trajectory_aircraft.mp4')
 
     # We define the length of the arrow for representing the orientation
     length = length_vec_orientation
 
+    if elev != False and azim != False:
+        ax.view_init(elev = elev, azim = azim)
+
+    # # Draw latitude lines
+    # u = np.linspace(0, 2 * np.pi, 100)
+    # v = np.linspace(0, np.pi, 100)
+
+    # # Draw longitude lines
+    # for i in np.linspace(0, 2 * np.pi, 20):
+    #     x_lon = R * np.cos(i) * np.sin(v)
+    #     y_lon = R * np.sin(i) * np.sin(v)
+    #     z_lon = R * np.cos(v)
+    #     ax.plot(x_lon, y_lon, z_lon, color='black', linestyle = ':', linewidth=0.5)
+
     # We also plot the spheres at the initial configuration
     if path_type in ['cyc_inner', 'plane_inner_outer', 'spheres_inner']:
-        xini_inner, yini_inner, zini_inner = generate_points_sphere([ini_config[0, i] + R*ini_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xini_inner, yini_inner, zini_inner, color = 'orange', alpha=0.4)
+        xini, yini, zini = generate_points_sphere([ini_config[0, i] + R*ini_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xini, yini, zini, color = 'orange', alpha=0.2)
+
+    elif path_type in ['cyc_outer', 'plane_outer_inner', 'spheres_outer']:
+        xini, yini, zini = generate_points_sphere([ini_config[0, i] - R*ini_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xini, yini, zini, color = 'magenta', alpha=0.2)
+
+    elif path_type in ['cyc_left', 'plane_left_right', 'spheres_left']:
+        xini, yini, zini = generate_points_sphere([ini_config[0, i] + R*ini_config[2, i] for i in range(3)], R)
+        ax.plot_surface(xini, yini, zini, color = 'orange', alpha=0.2)
+
     else:
-        xini_outer, yini_outer, zini_outer = generate_points_sphere([ini_config[0, i] - R*ini_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xini_outer, yini_outer, zini_outer, color = 'magenta', alpha=0.4)
+        xini, yini, zini = generate_points_sphere([ini_config[0, i] - R*ini_config[2, i] for i in range(3)], R)
+        ax.plot_surface(xini, yini, zini, color = 'magenta', alpha=0.2)
 
     # We also plot the spheres at the final configuration
     if path_type in ['cyc_inner', 'plane_outer_inner', 'spheres_inner']:
-        xfin_inner, yfin_inner, zfin_inner = generate_points_sphere([fin_config[0, i] + R*fin_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xfin_inner, yfin_inner, zfin_inner, color = 'orange', alpha=0.4)
+        xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] + R*fin_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xfin, yfin, zfin, color = 'orange', alpha=0.2)
+    elif path_type in ['cyc_outer', 'plane_inner_outer', 'spheres_outer']:
+        xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] - R*fin_config[3, i] for i in range(3)], R)
+        ax.plot_surface(xfin, yfin, zfin, color = 'magenta', alpha=0.2)
+    elif path_type in ['cyc_left', 'plane_right_left', 'spheres_left']:
+        xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] + R*fin_config[2, i] for i in range(3)], R)
+        ax.plot_surface(xfin, yfin, zfin, color = 'orange', alpha=0.2)
     else:
-        xfin_outer, yfin_outer, zfin_outer = generate_points_sphere([fin_config[0, i] - R*fin_config[3, i] for i in range(3)], R)
-        ax.plot_surface(xfin_outer, yfin_outer, zfin_outer, color = 'magenta', alpha=0.4)
+        xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] - R*fin_config[2, i] for i in range(3)], R)
+        ax.plot_surface(xfin, yfin, zfin, color = 'magenta', alpha=0.2)
 
     ax.scatter(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], marker = 'o', s = 50, linewidth = 1.5,\
             color = 'r', label = 'Initial point')
@@ -111,16 +151,18 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
 
     ax.plot3D(pos_global[:, 0], pos_global[:, 1], pos_global[:, 2], linewidth = 2.5, color = 'k', label = 'Trajectory')
     
-    ax.set_xlabel('X', fontsize = 12)
-    ax.set_ylabel('Y', fontsize = 12)
-    ax.set_zlabel('Z', fontsize = 12)
+    ax.set_xlabel(r'$X$', fontsize = 18)
+    ax.set_ylabel(r'$Y$', fontsize = 18)
+    ax.set_zlabel(r'$Z$', fontsize = 18)
 
     ax.set_xlim(xgrid_size[0], xgrid_size[1])
     ax.set_ylim(ygrid_size[0], ygrid_size[1])
     ax.set_zlim(zgrid_size[0], zgrid_size[1])
 
+    ax.tick_params(axis='both', which='major', labelsize = 14)
+    ax.tick_params(axis='both', which='minor', labelsize = 14)
 
-    ax.legend(fontsize = 9, loc = 1)
+    ax.legend(fontsize = 14, loc = 0, ncol = 2)
 
     # We now begin plotting the configuration
     locplot = None; tangplot = None; surfplot = None; tangnorm_plot = None
@@ -150,34 +192,70 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
         true_state.east = pos_global[i, 1]
         true_state.altitude = -pos_global[i, 2]
 
+        # Constructing the rotation matrix
+        R_mat = np.array([[tang_global_path[i, 0], tang_normal_global_path[i, 0], surf_normal_global_path[i, 0]],\
+                        [tang_global_path[i, 1], tang_normal_global_path[i, 1], surf_normal_global_path[i, 1]],\
+                        [tang_global_path[i, 2], tang_normal_global_path[i, 2], surf_normal_global_path[i, 2]]])
+
         # We compute the orientation of the aircraft
         # Calculating the angles. The net rotation matrix is given below. Here, psi is yaw angle, theta is pitch, and phi is roll angle.
         """cψcθ −sψcφ + cψsθsφ sψsφ + cψsθcφ
         sψcθ cψcφ + sψsθsφ −cψsφ + sψsθcφ
         −sθ cθsφ cθcφ"""
+        pitch_angle_val = np.nan; yaw_angle_val = np.nan; roll_angle_val = np.nan
 
         if math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2) <= 10**(-8):
             
-            pitch_angle = [-np.sign(tang_global_path[i][2])*math.pi/2]
+            pitch_angle = -np.sign(tang_global_path[i][2])*math.pi/2
             # We set roll angle to be zero
             roll_angle = 0.0
             yaw_angle = math.atan2(-tang_normal_global_path[i][0], tang_normal_global_path[i][1])
 
+            # We check if the desired rotation matrix matches
+            R_net = euler_to_rotation(roll_angle, pitch_angle, yaw_angle)
+
+            if abs(max(map(max, R_mat - R_net))) <= 10**(-4) and abs(min(map(min, R_mat - R_net))) <= 10**(-4):
+                    
+                pitch_angle_val = angle
+                yaw_angle_val = yaw_angle
+                roll_angle_val = roll_angle
+
         else:
 
-            pitch_angle = math.atan2(-tang_global_path[i][2], math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2))
-            yaw_angle = math.atan2(tang_global_path[i][1], tang_global_path[i][0])
-            roll_angle = math.atan2(surf_normal_global_path[i][2], surf_normal_global_path[i][2])
+            # pitch_angle = math.atan2(-tang_global_path[i][2], math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2))
+            # yaw_angle = math.atan2(tang_global_path[i][1], tang_global_path[i][0])
+            # roll_angle = math.atan2(surf_normal_global_path[i][2], surf_normal_global_path[i][2])
+            pitch_angle = [math.atan2(-tang_global_path[i][2], math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2)),\
+                           math.atan2(-tang_global_path[i][2], -math.sqrt((tang_global_path[i][0])**2 + (tang_global_path[i][1])**2))]
+            for angle in pitch_angle:
 
+                yaw_angle = math.atan2(tang_global_path[i][1]/math.cos(angle), tang_global_path[i][0]/math.cos(angle))
+                roll_angle = math.atan2(tang_normal_global_path[i][2]/math.cos(angle), surf_normal_global_path[i][2]/math.cos(angle))
+
+                # We check if the desired rotation matrix matches
+                R_net = euler_to_rotation(roll_angle, angle, yaw_angle)
+
+                if abs(max(map(max, R_mat - R_net))) <= 10**(-4) and abs(min(map(min, R_mat - R_net))) <= 10**(-4):
+                    
+                    pitch_angle_val = angle
+                    yaw_angle_val = yaw_angle
+                    roll_angle_val = roll_angle
+                    break
+
+        if np.isnan(pitch_angle_val):
+
+            print('R is ', R_mat, ' and R_net is ', R_net)
+            raise Exception("Could not find euler angles.")
         # true_state.psi = yaw_angle[i]
         # true_state.theta = pitch_angle[i]
         # true_state.phi = roll_angle[i]
-        true_state.psi = yaw_angle
-        true_state.theta = pitch_angle
-        true_state.phi = roll_angle
+        true_state.psi = yaw_angle_val
+        true_state.theta = pitch_angle_val
+        true_state.phi = roll_angle_val
 
         # Plotting the aircraft
         viewers.update(
+            fig,
             time.time(),
             true_state = true_state,  # true states
         )
@@ -187,9 +265,15 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
         # ax.set_zlim(pos_global[i, 2] - 1.5, pos_global[i, 2] + 1.5)
 
         # ax.view_init(elev = pitch_angle, azim = yaw_angle, roll=0)
+        # Updating the video
 
         # print('Printing the ', i, 'th point')
-        plt.pause(.05)
+        plt.pause(0.05)
+
+    # We close the simulation
+    viewers.close()
+
+    plt.ioff()  # Turn off interactive mode
 
     # We show the trajectory plot
     plt.show()

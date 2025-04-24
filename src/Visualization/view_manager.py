@@ -22,9 +22,10 @@ class ViewManager:
         if self.video_flag is True:
             from video_writer import VideoWriter
             self.video = VideoWriter(
-                video_name=video_name,
-                bounding_box=(0, 0, 750, 750),
-                output_rate = ts_video)
+                video_name=video_name
+                # bounding_box=(0, 0, 750, 750),
+                # output_rate = ts_video
+                )
         # initialize the other visualization
         if self.animation_flag: 
             # self.app = pg.QtWidgets.QApplication([]) 
@@ -32,7 +33,7 @@ class ViewManager:
                 # self.mav_view = MavViewer(app=self.app)
                 self.mav_view = MavViewer(fig, scale_aircraft)
 
-    def update(self,
+    def update(self, fig,
                sim_time: float,
                true_state: MsgState=None):
         if self.animation_flag: 
@@ -40,15 +41,10 @@ class ViewManager:
         # if self.animation_flag or self.data_plot_flag or self.sensor_plot_flag: 
         #     self.app.processEvents()
         if self.video_flag is True: 
-            self.video.update(sim_time)
+            self.video.update(fig)
 
     def close(self, dataplot_name: str=[], sensorplot_name: str=[]):
         # Save an Image of the Plot
-        if self.save_plots_flag:
-            if self.data_plots_flag: 
-                self.data_view.save_plot_image(dataplot_name)
-            if self.sensor_plots_flag: 
-                self.sensor_view.save_plot_image(sensorplot_name)
         if self.video_flag: 
             self.video.close()
 

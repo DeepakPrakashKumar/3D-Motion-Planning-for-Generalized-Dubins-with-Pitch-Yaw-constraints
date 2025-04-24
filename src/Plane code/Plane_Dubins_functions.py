@@ -73,7 +73,75 @@ def ini_fin_config_manipulate(ini_config, fin_config):
         
     return ini_config_mod, fin_config_mod, d
 
-def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's'):
+def operator_segments(start_pt_config, seg_param, rad_turn_seg, seg_type = 's'):
+    '''
+    This function defines the operators corresponding to left, right, and straight
+    line segments on the plane.
+
+    Parameters
+    ----------
+    start_pt_config : Numpy 1x3 array
+        Configuration of the start of the arc in the original frame of reference.
+    seg_param : Scalar
+        Value of the parameter of the segment. If the segment is a straight line,
+        then the parameter is the length of the straight line segment. If the segment
+        is an arc of a circle, then the parameter of the segment is the angle of turn.
+    rad_turn_seg : Scalar
+        Radius of the tight turn which corresponds to the type of the turn. For
+        example, the radius of the left and right turns need not be the same.
+    seg_type : Character
+        's' - straight line segment
+        'l' - left tight turn, whose radius is given by rad_tight_turn
+        'r' - right tight turn, whose radius if given by rad_tight_turn
+
+    Returns
+    -------
+    pts_original_frame : Numpy nx3 array
+        Contains the coordinates of the points along the left segment turn.
+    
+    '''
+
+    # We obtain the final configuration after the operator is applied
+    output_config = np.empty(3)
+
+    if seg_type.lower() == 'l':
+        
+        # x-coordinate
+        output_config[0] = start_pt_config[0]\
+            + rad_turn_seg*math.sin(start_pt_config[2] + seg_param)\
+            - rad_turn_seg*math.sin(start_pt_config[2])
+        # y-coordinate
+        output_config[1] = start_pt_config[1]\
+            - rad_turn_seg*math.cos(start_pt_config[2] + seg_param)\
+            + rad_turn_seg*math.cos(start_pt_config[2])
+        # Heading
+        output_config[2] = start_pt_config[2] + seg_param
+        
+    elif seg_type.lower() == 'r':
+
+        # x-coordinate
+        output_config[0] = start_pt_config[0]\
+            - rad_turn_seg*math.sin(start_pt_config[2] - seg_param)\
+            + rad_turn_seg*math.sin(start_pt_config[2])
+        # y-coordinate
+        output_config[1] = start_pt_config[1]\
+            + rad_turn_seg*math.cos(start_pt_config[2] - seg_param)\
+            - rad_turn_seg*math.cos(start_pt_config[2])
+        # Heading
+        output_config[2] = start_pt_config[2] - seg_param
+
+    else:
+
+        # x-coordinate
+        output_config[0] = start_pt_config[0] + seg_param*math.cos(start_pt_config[2])
+        # y-coordinate
+        output_config[1] = start_pt_config[1] + seg_param*math.sin(start_pt_config[2])
+        # Heading
+        output_config[2] = start_pt_config[2]
+
+    return output_config
+
+def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's', dist_disc = 0.1):
     '''
     This function returns an array of points corresponding to a left turn,
     right turn, or straight line segment, given the configuration corresponding
@@ -106,55 +174,76 @@ def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's'):
     '''
     
     # Discretizing the segment length for straight line or the angle for a tight turn
-    segment_disc = np.linspace(0, seg_param_val, 100)
-    pts_original_frame = np.zeros((100, 3))
-    
+    # segment_disc = np.linspace(0, seg_param_val, 10)
+    # Discretizing the angle of the turn
     if seg_type.lower() == 'l' or seg_type.lower() == 'r':
+        
+        num_disc = int(np.ceil(seg_param_val*rad_turn_seg/dist_disc))
+        
+    else:
+        
+        num_disc = int(np.ceil(seg_param_val/dist_disc))
+        
+    # Defining the discretization of the angle for turns and length for straight line
+    segment_disc = np.linspace(0, seg_param_val, num_disc)
+    pts_original_frame = np.zeros((num_disc, 3))
+
+    # print('Segment discretization: ', segment_disc)
     
-        # Finding the coordinates of the point corresponding to the discretization
-        # of the angle of the segment if left or right turn
-        for i in range(len(segment_disc)):
+    # if seg_type.lower() == 'l' or seg_type.lower() == 'r':
+    
+    #     # Finding the coordinates of the point corresponding to the discretization
+    #     # of the angle of the segment if left or right turn
+    #     for i in range(len(segment_disc)):
             
-            if seg_type.lower() == 'l':
+    #         if seg_type.lower() == 'l':
         
-                # x-coordinate
-                pts_original_frame[i, 0] = start_pt_config[0]\
-                    + rad_turn_seg*math.sin(start_pt_config[2] + segment_disc[i])\
-                    - rad_turn_seg*math.sin(start_pt_config[2])
-                # y-coordinate
-                pts_original_frame[i, 1] = start_pt_config[1]\
-                    - rad_turn_seg*math.cos(start_pt_config[2] + segment_disc[i])\
-                    + rad_turn_seg*math.cos(start_pt_config[2])
-                # Heading
-                pts_original_frame[i, 2] = start_pt_config[2] + segment_disc[i]
+    #             # x-coordinate
+    #             pts_original_frame[i, 0] = start_pt_config[0]\
+    #                 + rad_turn_seg*math.sin(start_pt_config[2] + segment_disc[i])\
+    #                 - rad_turn_seg*math.sin(start_pt_config[2])
+    #             # y-coordinate
+    #             pts_original_frame[i, 1] = start_pt_config[1]\
+    #                 - rad_turn_seg*math.cos(start_pt_config[2] + segment_disc[i])\
+    #                 + rad_turn_seg*math.cos(start_pt_config[2])
+    #             # Heading
+    #             pts_original_frame[i, 2] = start_pt_config[2] + segment_disc[i]
                 
-            elif seg_type.lower() == 'r':
+    #         elif seg_type.lower() == 'r':
         
-                # x-coordinate
-                pts_original_frame[i, 0] = start_pt_config[0]\
-                    - rad_turn_seg*math.sin(start_pt_config[2] - segment_disc[i])\
-                    + rad_turn_seg*math.sin(start_pt_config[2])
-                # y-coordinate
-                pts_original_frame[i, 1] = start_pt_config[1]\
-                    + rad_turn_seg*math.cos(start_pt_config[2] - segment_disc[i])\
-                    - rad_turn_seg*math.cos(start_pt_config[2])
-                # Heading
-                pts_original_frame[i, 2] = start_pt_config[2] - segment_disc[i]
+    #             # x-coordinate
+    #             pts_original_frame[i, 0] = start_pt_config[0]\
+    #                 - rad_turn_seg*math.sin(start_pt_config[2] - segment_disc[i])\
+    #                 + rad_turn_seg*math.sin(start_pt_config[2])
+    #             # y-coordinate
+    #             pts_original_frame[i, 1] = start_pt_config[1]\
+    #                 + rad_turn_seg*math.cos(start_pt_config[2] - segment_disc[i])\
+    #                 - rad_turn_seg*math.cos(start_pt_config[2])
+    #             # Heading
+    #             pts_original_frame[i, 2] = start_pt_config[2] - segment_disc[i]
         
-    elif seg_type.lower() == 's':
+    # elif seg_type.lower() == 's':
         
-        # Finding the coordinates of the point corresponding to the discretization
-        # on the line
-        for i in range(len(segment_disc)):
+    #     # Finding the coordinates of the point corresponding to the discretization
+    #     # on the line
+    #     for i in range(len(segment_disc)):
             
-            # x-coordinate
-            pts_original_frame[i, 0] = start_pt_config[0] +\
-                segment_disc[i]*math.cos(start_pt_config[2])
-            # y-coordinate
-            pts_original_frame[i, 1] = start_pt_config[1] +\
-                segment_disc[i]*math.sin(start_pt_config[2])
-            # Heading
-            pts_original_frame[i, 2] = start_pt_config[2]
+    #         # x-coordinate
+    #         pts_original_frame[i, 0] = start_pt_config[0] +\
+    #             segment_disc[i]*math.cos(start_pt_config[2])
+    #         # y-coordinate
+    #         pts_original_frame[i, 1] = start_pt_config[1] +\
+    #             segment_disc[i]*math.sin(start_pt_config[2])
+    #         # Heading
+    #         pts_original_frame[i, 2] = start_pt_config[2]
+
+    for i in range(len(segment_disc)):
+
+        config = operator_segments(start_pt_config, segment_disc[i], rad_turn_seg, seg_type.lower())
+        
+        pts_original_frame[i, 0] = config[0]
+        pts_original_frame[i, 1] = config[1]
+        pts_original_frame[i, 2] = config[2]
         
     return pts_original_frame
 
@@ -184,6 +273,8 @@ def points_path(ini_config, r, params_seg, path_type):
         Contains the x-coordinate of points generated along the path.
     y_coords_path : Numpy nx1 array
         Contains the y-coordinate of points generated along the path.
+    heading_path : Numpy nx1 array
+        Contains the heading of points generated along the path.
 
     '''
     
@@ -199,6 +290,10 @@ def points_path(ini_config, r, params_seg, path_type):
     
     x_coords_path = np.array([])
     y_coords_path = np.array([])
+    heading_path = np.array([])
+
+    # print('Consider path of type ', path_type, ' with parameters ', params_seg)
+
     for i in range(len(path_type)):
         
         # Obtaining the points along the ith segment
@@ -213,13 +308,26 @@ def points_path(ini_config, r, params_seg, path_type):
                                       0, 's')
                 
         # Appending the obtained points to the arrays
-        x_coords_path = np.append(x_coords_path, pts_ith_segment[:, 0])
-        y_coords_path = np.append(y_coords_path, pts_ith_segment[:, 1])
+        # We check if we are considering the last segment or any other segment
+        if i == len(path_type) - 1:
+
+            x_coords_path = np.append(x_coords_path, pts_ith_segment[:, 0])
+            y_coords_path = np.append(y_coords_path, pts_ith_segment[:, 1])
+            heading_path = np.append(heading_path, pts_ith_segment[:, 2])
+
+        else:
+
+            x_coords_path = np.append(x_coords_path, pts_ith_segment[:-1, 0])
+            y_coords_path = np.append(y_coords_path, pts_ith_segment[:-1, 1])
+            heading_path = np.append(heading_path, pts_ith_segment[:-1, 2])
         
+        # print('Points for segment ', i, ' are ', pts_ith_segment)
+
         # Updating the variable config_after_ith_segment
-        config_after_ith_segment = pts_ith_segment[-1]
+        # config_after_ith_segment = pts_ith_segment[-1]
+        config_after_ith_segment = operator_segments(config_after_ith_segment, params_seg[i], r, path_type[i].lower())
     
-    return x_coords_path, y_coords_path
+    return x_coords_path, y_coords_path, heading_path
 
 def CSC_path(ini_config, fin_config, r, path_type = 'lsl'):
     '''
@@ -664,7 +772,7 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
     
     # Obtaining points along the optimal paths for 2D Dubins
     path_params_opt = path_params[np.nanargmin(path_lengths)]
-    pts_path_x_coords_opt, pts_path_y_coords_opt\
+    pts_path_x_coords_opt, pts_path_y_coords_opt, heading_path_opt\
         = points_path(ini_config, r, path_params_opt, opt_path_type_configs)
     
     # Visualizing the paths
@@ -711,7 +819,7 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
             
                 # Obtaining the coordinates of points along the path using the
                 # points path function
-                pts_path_x_coords, pts_path_y_coords = points_path(ini_config, r,\
+                pts_path_x_coords, pts_path_y_coords, _ = points_path(ini_config, r,\
                                                                    path_params[i],\
                                                                    path_types[i])
                     
@@ -758,4 +866,5 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
         # Writing onto the html file
         fig_plane_path.writing_fig_to_html(filename, 'a')
                     
-    return opt_path_length, path_params_opt, opt_path_type_configs, pts_path_x_coords_opt, pts_path_y_coords_opt
+    return opt_path_length, path_params_opt, opt_path_type_configs, pts_path_x_coords_opt,\
+          pts_path_y_coords_opt, heading_path_opt

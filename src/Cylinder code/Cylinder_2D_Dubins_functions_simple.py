@@ -253,9 +253,9 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Obtaining all the information regarding the paths from the initial configuration to
     # the two images of the final configuration
-    path_length_img_1, path_params_img_1, path_type_img_1, _, _ = \
+    path_length_img_1, path_params_img_1, path_type_img_1, _, _, heading_img_1 = \
         optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, False)
-    path_length_img_2, path_params_img_2, path_type_img_2, _, _ = \
+    path_length_img_2, path_params_img_2, path_type_img_2, _, _, heading_img_2 = \
         optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, False)
     
     # Finding the optimal path type, the minimum length of the path, and the parameters
@@ -378,14 +378,14 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         # Obtaining the points along the path using the points_path function if path exists
         # Path to first image        
         # Obtaining the points along the path for the first image and plotting on the plane
-        pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1 =\
+        pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1, _ =\
             points_path(ini_config, rad_tight_turn, path_params_img_1, path_type_img_1)
         fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_1, pts_path_plane_y_coord_img_1,\
                                     'blue', 'Optimal path to first image of type ' + path_type_img_1.upper())
         
         # Path to second image        
         # Obtaining the points along the path for the second image and plotting on the plane
-        pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2 =\
+        pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2, _ =\
             points_path(ini_config, rad_tight_turn, path_params_img_2, path_type_img_2)
         fig_plane_path.scatter_2D(pts_path_plane_x_coord_img_2, pts_path_plane_y_coord_img_2,\
                                     'purple', 'Optimal path to second image of type ' + path_type_img_2.upper())
@@ -436,7 +436,7 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Generating the coordinates of the optimal path
     # Obtaining the points for the optimal path on the plane
-    pts_opt_path_plane_x_coord, pts_opt_path_plane_y_coord =\
+    pts_opt_path_plane_x_coord, pts_opt_path_plane_y_coord, heading_opt =\
         points_path(ini_config, rad_tight_turn, [t_opt, p_opt, q_opt], opt_path_type)
             
     # Obtaining the coordinates for the optimal path in the global frame for the cylinder
@@ -447,7 +447,21 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     points_path_global[:, 1] = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
                                          for j in pts_opt_path_plane_x_coord])
     points_path_global[:, 2] = np.array([(ini_pos[2] + j) for j in pts_opt_path_plane_y_coord])
-    
+
+    # Obtaining the tangent vector and the normal vector to the cylinder for the optimal path
+    # on the cylinder
+    tang_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
+    normal_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
+
+    for j in range(len(pts_opt_path_plane_x_coord)):
+
+        # We compute the tangent vector in the global frame
+        theta = np.arctan2(points_path_global[j, 1], points_path_global[j, 0])
+        tang_vect_global[j] = np.array([-math.sin(theta)*math.cos(heading_opt[j]), math.cos(theta)*math.cos(heading_opt[j]), math.sin(heading_opt[j])])
+
+        # We compute normal vector in the global frame
+        normal_vect_global[j] = np.array([math.cos(theta), math.sin(theta), 0])
+
     if visualization == 1:
         
         # Making a copy for the initial and final configurations on the cylinder
@@ -461,4 +475,4 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         # Writing onto the html file
         fig_cylinder_path.writing_fig_to_html(filename, 'a')
     
-    return min_path_length, opt_path_type, points_path_global
+    return min_path_length, opt_path_type, points_path_global, tang_vect_global, normal_vect_global
