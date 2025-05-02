@@ -111,11 +111,11 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
 
     elif path_type in ['cyc_left', 'plane_left_right', 'spheres_left']:
         xini, yini, zini = generate_points_sphere([ini_config[0, i] + R*ini_config[2, i] for i in range(3)], R)
-        ax.plot_surface(xini, yini, zini, color = 'orange', alpha=0.2)
+        ax.plot_surface(xini, yini, zini, color = 'blue', alpha=0.2)
 
     else:
         xini, yini, zini = generate_points_sphere([ini_config[0, i] - R*ini_config[2, i] for i in range(3)], R)
-        ax.plot_surface(xini, yini, zini, color = 'magenta', alpha=0.2)
+        ax.plot_surface(xini, yini, zini, color = 'green', alpha=0.2)
 
     # We also plot the spheres at the final configuration
     if path_type in ['cyc_inner', 'plane_outer_inner', 'spheres_inner']:
@@ -126,10 +126,10 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
         ax.plot_surface(xfin, yfin, zfin, color = 'magenta', alpha=0.2)
     elif path_type in ['cyc_left', 'plane_right_left', 'spheres_left']:
         xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] + R*fin_config[2, i] for i in range(3)], R)
-        ax.plot_surface(xfin, yfin, zfin, color = 'orange', alpha=0.2)
+        ax.plot_surface(xfin, yfin, zfin, color = 'blue', alpha=0.2)
     else:
         xfin, yfin, zfin = generate_points_sphere([fin_config[0, i] - R*fin_config[2, i] for i in range(3)], R)
-        ax.plot_surface(xfin, yfin, zfin, color = 'magenta', alpha=0.2)
+        ax.plot_surface(xfin, yfin, zfin, color = 'green', alpha=0.2)
 
     ax.scatter(ini_config[0, 0], ini_config[0, 1], ini_config[0, 2], marker = 'o', s = 50, linewidth = 1.5,\
             color = 'r', label = 'Initial point')

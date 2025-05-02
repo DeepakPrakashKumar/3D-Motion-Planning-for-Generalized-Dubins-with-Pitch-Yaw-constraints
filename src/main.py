@@ -39,8 +39,8 @@ fin_config = np.array([[30, 10, 15],\
 # If a random initial and final configuration ought to be generated, we randomly generate the initial and final configurations.
 xlim = 40; ylim = 40; zlim = 40; # We provide the region in the 3d space wherein we want to generate the configuration.
 # xlim is used to pick a random x coordinate between 0 and xlim; similar interpretation follows for ylim and zlim.
-ini_config = generate_random_configs_3D(xlim, ylim, zlim)
-fin_config = generate_random_configs_3D(xlim, ylim, zlim)
+# ini_config = generate_random_configs_3D(xlim, ylim, zlim)
+# fin_config = generate_random_configs_3D(xlim, ylim, zlim)
 
 xgrid_size = [-xlim/2, xlim/2]
 ygrid_size = [-ylim/2, ylim/2]
@@ -75,7 +75,7 @@ disc_no = 5
 # We call the main function that constructs feasible solutions through sphere-cylinder-sphere, sphere-plane-sphere, and sphere-sphere-sphere
 # combinations, and returns the path and orientations corresponding to the best path.
 min_dist_path_length, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type =\
-      Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R_pitch, disc_no, visualization = 1, filename = 'temp.html')
+      Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R_pitch, disc_no, visualization = 1, vis_best_surf_path = 1, filename = 'temp.html')
 
 # print('Tangent vectors for the path are:\n', tang_global_path)
 
@@ -83,6 +83,8 @@ if "left" in path_type or "right" in path_type:
     R = R_yaw
 else:
     R = R_pitch
+
+print('The path type is ' + path_type + '. The minimum distance is', min_dist_path_length, '.')
 
 # We now simulate the motion of a vehicle along the path that we have obtained.
 # plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R,\

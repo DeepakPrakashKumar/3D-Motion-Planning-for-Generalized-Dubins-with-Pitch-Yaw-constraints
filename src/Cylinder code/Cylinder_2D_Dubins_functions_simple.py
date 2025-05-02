@@ -176,7 +176,7 @@ def unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, point_pos, point_tang
         theta1 = deltheta
         theta2 = deltheta - 2*math.pi
         
-    elif deltheta == 0: # HERE, CONSIDER TWO ADDITIONAL ANGLES; -2*PI, AND 2*PI.
+    elif deltheta == 0:
         
         theta1 = theta2 = deltheta
         
@@ -197,7 +197,7 @@ def unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, point_pos, point_tang
     return pos_plane_1, pos_plane_2, heading_ini_pos_plane, heading_point_pos_plane
 
 def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
-                            zmax = 20, visualization = 1, rad_tight_turn = 1, filename = 'temp.html'):
+                            zmax = 20, visualization = 1, rad_tight_turn = 1, path_config = 1, filename = 'temp.html'):
     '''
     This function generates a path between two points on a right circular cylinder
     using the 2D Dubins result and visualizes the path. Note that the right circular
@@ -253,11 +253,15 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Obtaining all the information regarding the paths from the initial configuration to
     # the two images of the final configuration
-    path_length_img_1, path_params_img_1, path_type_img_1, _, _, heading_img_1 = \
-        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, False)
-    path_length_img_2, path_params_img_2, path_type_img_2, _, _, heading_img_2 = \
-        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, False)
+    path_length_img_1, path_params_img_1, path_type_img_1, _, _, _ = \
+        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, path_config = 0, filename = False)
+    path_length_img_2, path_params_img_2, path_type_img_2, _, _, _ = \
+        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, path_config = 0, filename = False)
     
+    # print('The path lengths are ', path_length_img_1, ' and ', path_length_img_2)
+    # print('The path types are ', path_type_img_1, ' and ', path_type_img_2)
+    # print('The path parameters are ', path_params_img_1, ' and ', path_params_img_2)
+
     # Finding the optimal path type, the minimum length of the path, and the parameters
     # of the path
     if path_length_img_1 <= path_length_img_2:
@@ -324,8 +328,8 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         fig_cylinder.update_layout_3D('X (m)', 'Y (m)', 'Z (m)',\
                                       'Initial and final configurations on a cylinder')
         # Writing onto the html file
-        # fig_cylinder.writing_fig_to_html(filename, 'w')
-        fig_cylinder.writing_fig_to_html(filename, 'a')
+        fig_cylinder.writing_fig_to_html(filename, 'w')
+        # fig_cylinder.writing_fig_to_html(filename, 'a')
         
         # Plotting the initial and final configuration on the plane after unwrapping the cylinder
         # Creating a 2D plot. fig_plane is declared as an instance of the class plotting_functions.
@@ -361,10 +365,10 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
             f.write("<br\><br\><br\>Details of the paths:")
         with open(filename, 'a') as f:
             f.write("<br\>-----------Paths to first image of the final configuration-----------")
-        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, filename)
+        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, filename = filename)
         with open(filename, 'a') as f:
             f.write("-----------Paths to second image of the final configuration-----------")
-        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, filename)
+        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, filename = filename)
         with open(filename, 'a') as f:
             f.write("Optimal path is of type " + opt_path_type.upper() + " and of length "\
                     + str(min_path_length) + ".<br />")
@@ -434,33 +438,39 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         # Writing onto the html file
         fig_cylinder_path.writing_fig_to_html(filename, 'a')
     
-    # Generating the coordinates of the optimal path
-    # Obtaining the points for the optimal path on the plane
-    pts_opt_path_plane_x_coord, pts_opt_path_plane_y_coord, heading_opt =\
-        points_path(ini_config, rad_tight_turn, [t_opt, p_opt, q_opt], opt_path_type)
-            
-    # Obtaining the coordinates for the optimal path in the global frame for the cylinder
-    points_path_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
-    
-    points_path_global[:, 0] = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
-                                         for j in pts_opt_path_plane_x_coord])
-    points_path_global[:, 1] = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
-                                         for j in pts_opt_path_plane_x_coord])
-    points_path_global[:, 2] = np.array([(ini_pos[2] + j) for j in pts_opt_path_plane_y_coord])
+    if path_config == 1:
 
-    # Obtaining the tangent vector and the normal vector to the cylinder for the optimal path
-    # on the cylinder
-    tang_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
-    normal_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
+        # Generating the coordinates of the optimal path
+        # Obtaining the points for the optimal path on the plane
+        pts_opt_path_plane_x_coord, pts_opt_path_plane_y_coord, heading_opt =\
+            points_path(ini_config, rad_tight_turn, [t_opt, p_opt, q_opt], opt_path_type)
+                
+        # Obtaining the coordinates for the optimal path in the global frame for the cylinder
+        points_path_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
+        
+        points_path_global[:, 0] = np.array([R*math.cos(ini_pos_parametrization_angle + (j)/R)\
+                                            for j in pts_opt_path_plane_x_coord])
+        points_path_global[:, 1] = np.array([R*math.sin(ini_pos_parametrization_angle + (j)/R)\
+                                            for j in pts_opt_path_plane_x_coord])
+        points_path_global[:, 2] = np.array([(ini_pos[2] + j) for j in pts_opt_path_plane_y_coord])
 
-    for j in range(len(pts_opt_path_plane_x_coord)):
+        # Obtaining the tangent vector and the normal vector to the cylinder for the optimal path
+        # on the cylinder
+        tang_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
+        normal_vect_global = np.empty((np.size(pts_opt_path_plane_x_coord), 3))
 
-        # We compute the tangent vector in the global frame
-        theta = np.arctan2(points_path_global[j, 1], points_path_global[j, 0])
-        tang_vect_global[j] = np.array([-math.sin(theta)*math.cos(heading_opt[j]), math.cos(theta)*math.cos(heading_opt[j]), math.sin(heading_opt[j])])
+        for j in range(len(pts_opt_path_plane_x_coord)):
 
-        # We compute normal vector in the global frame
-        normal_vect_global[j] = np.array([math.cos(theta), math.sin(theta), 0])
+            # We compute the tangent vector in the global frame
+            theta = np.arctan2(points_path_global[j, 1], points_path_global[j, 0])
+            tang_vect_global[j] = np.array([-math.sin(theta)*math.cos(heading_opt[j]), math.cos(theta)*math.cos(heading_opt[j]), math.sin(heading_opt[j])])
+
+            # We compute normal vector in the global frame
+            normal_vect_global[j] = np.array([math.cos(theta), math.sin(theta), 0])
+
+    else:
+
+        points_path_global = []; tang_vect_global = []; normal_vect_global = []
 
     if visualization == 1:
         

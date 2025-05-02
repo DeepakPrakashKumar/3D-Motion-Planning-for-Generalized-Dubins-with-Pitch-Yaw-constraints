@@ -23,13 +23,13 @@ from Cylinder_2D_Dubins_functions_simple import generate_visualize_path
 # Importing code for the sphere
 rel_path = '\Sphere code'
 os.chdir(path_str + rel_path)
-from Path_generation_sphere import optimal_path_sphere_three_seg, generate_points_sphere
+from Path_generation_sphere import optimal_path_sphere, generate_points_sphere
 
 # Returning to initial directory
 os.chdir(cwd)
 
 def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sphere, center_fin_sphere,\
-                                           r, R, axis_cylinder, ht_cylinder, disc_no, plot_figure_configs,\
+                                           r, Ryaw, Rpitch, axis_cylinder, ht_cylinder, disc_no_loc, disc_no_heading, plot_figure_configs,\
                                            visualization = 1, filename = "temp.html", type = 'inner', vis_int = 0):
     '''
     In this function, the paths connecting a given pair of spheres (inner or outer) with
@@ -50,10 +50,10 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
         Contains the position of the center of the initial sphere.
     center_fin_sphere : Array
         Contains the position of the center of the final sphere.
-    r: Scalar
-        Radius of the tight turn.
-    R : Scalar
-        Radius of the surface.
+    r_min: Scalar
+        Radius of the tight turn on sphere.
+    Ryaw, Rpitch : Scalar
+        Minimum turning radius for pitch and yaw motion.
     axis_cylinder : Array
         Axis of the cylinder connecting the considered pair of spheres.
     ht_cylinder : Scalar
@@ -85,38 +85,65 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
     # NOTE: thetai and thetao are generated such that they are in the interval
     # [0, 2pi). Therefore, they cannot take the value of 2pi, as this will then
     # cause a redundancy.
-    thetai = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
-    thetao = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
-    phii = np.linspace(0, math.pi, disc_no)
-    phio = np.linspace(0, math.pi, disc_no)
+    thetai = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
+    thetao = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
+    phii = np.linspace(0, math.pi, disc_no_heading)
+    phio = np.linspace(0, math.pi, disc_no_heading)
 
     # We generate a random vector and orthonormalize it with respect to the axis
     # of the cylinder to obtain the x-axis for the cylinder.
     flag = 0; counter = 0
     tol = 10**(-2) # tolerance for the dot product
+    # while flag == 0:
+
+    #     # Generating a random vector
+    #     temp = np.random.rand(3)
+
+    #     # Orthonormalizing using Gram Schmidt
+    #     if np.linalg.norm(-np.dot(temp, axis_cylinder)*axis_cylinder + temp) > tol:
+
+    #         # In this case, we have obtained the desired x-axis
+    #         x = (-np.dot(temp, axis_cylinder)*axis_cylinder + temp)\
+    #             /np.linalg.norm(-np.dot(temp, axis_cylinder)*axis_cylinder + temp)
+            
+    #         flag = 1
+
+    #     else:
+            
+    #         # We check if we have exceeded a threshold counter to ensure that we do not
+    #         # go into an infinite loop
+    #         if counter > 5:
+    #             raise Exception('Going into an infinite loop for generating the random vector')
+            
+    #         # Incrementing the counter
+    #         counter += 1
+
+    # We consider the x, y, and z vectors and consider to orthonoramlize them
+    vect_arr = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     while flag == 0:
 
-        # Generating a random vector
-        temp = np.random.rand(3)
+        vector = vect_arr[counter]
 
-        # Orthonormalizing using Gram Schmidt
-        if np.linalg.norm(-np.dot(temp, axis_cylinder)*axis_cylinder + temp) > tol:
+        if np.linalg.norm(-np.dot(vector, axis_cylinder)*axis_cylinder + vector) > tol:
 
             # In this case, we have obtained the desired x-axis
-            x = (-np.dot(temp, axis_cylinder)*axis_cylinder + temp)\
-                /np.linalg.norm(-np.dot(temp, axis_cylinder)*axis_cylinder + temp)
+            x = (-np.dot(vector, axis_cylinder)*axis_cylinder + vector)\
+                /np.linalg.norm(-np.dot(vector, axis_cylinder)*axis_cylinder + vector)
             
             flag = 1
 
         else:
-            
-            # We check if we have exceeded a threshold counter to ensure that we do not
-            # go into an infinite loop
-            if counter > 5:
+
+            if counter < 2:
+                counter += 1
+            else:
                 raise Exception('Going into an infinite loop for generating the random vector')
-            
-            # Incrementing the counter
-            counter += 1
+
+    # For the surface normal, depending on whether an inner-inner or outer-outer connection is considered, the sign will differ
+    if type == 'outer': sign = 1; lrsign = 0; R = Rpitch; r_cyc = Ryaw
+    elif type == 'inner': sign = -1; lrsign = 0; R = Rpitch; r_cyc = Ryaw
+    elif type == 'left': lrsign = 1; sign = 0; R = Ryaw; r_cyc = Rpitch
+    else: lrsign = -1; sign = 0; R = Ryaw; r_cyc = Rpitch
 
     # Plotting the configurations, spheres, and cylinders if visualization is 1.
     if visualization == 1:       
@@ -201,7 +228,7 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
                         filename_sp = "sp_1_thetai_" + str(i) + "_phii_" + str(j) + ".html"
 
                         sp_1_path_lengths[i, j] =\
-                            optimal_path_sphere_three_seg(ini_config_sphere, fin_config_sphere, r, R, vis_int, filename_sp)[1]
+                            optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
                         
                     if np.isnan(sp_2_path_lengths[k, l]): # Checking if path length was already computed
                         
@@ -217,23 +244,34 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
                         filename_sp = "sp_2_thetao_" + str(k) + "_phio_" + str(k) + ".html"
 
                         sp_2_path_lengths[k, l] =\
-                            optimal_path_sphere_three_seg(ini_config_sphere, fin_config_sphere, r, R, vis_int, filename_sp)[1]
+                            optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
                         
                     # Now, we construct the path on the cylinder
-                    if np.isnan(cyl_path_lengths[j, k, l]): # Checking if path length was already computed
+                    k_mod = np.mod(k - i, len(thetao))
+                    if np.isnan(cyl_path_lengths[j, k_mod, l]): # Checking if path length was already computed
                         
-                        filename_cyc = "cyc_phii_" + str(j) + "_thetao_" + str(k) + "_phio_" + str(l) + ".html"
+                        filename_cyc = "cyc_phii_" + str(j) + "_thetao_" + str(k_mod) + "_phio_" + str(l) + ".html"
 
-                        cyl_path_lengths[j, k, l], _, _ = generate_visualize_path(PicB, TicB, R, PocB, TocB,\
-                                    ht_cylinder, vis_int, r, filename_cyc)
+                        cyl_path_lengths[j, k_mod, l] = generate_visualize_path(PicB, TicB, R, PocB, TocB,\
+                                    ht_cylinder, vis_int, r_cyc, path_config = 0, filename = filename_cyc)[0]
+                        
+                    # cost = generate_visualize_path(PicB, TicB, R, PocB, TocB,\
+                    #                 ht_cylinder, vis_int, r_cyc, filename_cyc)[0]
+                    # print('i = ', i, 'j = ', j, 'k = ', k, 'l = ', l, cost)
+                    # print('Cost considered is ', cyl_path_lengths[j, k_mod, l])
+                    # if abs(cost - cyl_path_lengths[j, k_mod, l]) > 1e-6:
+                    #     raise Exception('Exceeded tolerance')
 
-                    path_lengths[i, j, k, l] = sp_1_path_lengths[i, j] + cyl_path_lengths[j, k, l] + sp_2_path_lengths[k, l]
+                    path_lengths[i, j, k, l] = sp_1_path_lengths[i, j] + cyl_path_lengths[j, k_mod, l] + sp_2_path_lengths[k, l]
                             
                     # Checking if obtained solution is better
                     if path_lengths[i, j, k, l] < min_dist:
                         
                         min_dist = path_lengths[i, j, k, l]; thetai_min = thetai[i]; phii_min = phii[j]; thetao_min = thetao[k]
                         phio_min = phio[l]
+
+    # print(cyl_path_lengths)
+    # raise Exception('Exit')
 
     # We now plot the optimal path and/or obtain the configurations along the path
     # Obtaining the configuration of the Dubins vehicle
@@ -250,22 +288,22 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
     ini_config_sphere = config_sphere(ini_config[0, :], center_ini_sphere, ini_config[1, :])
     fin_config_sphere = config_sphere(Pic, center_ini_sphere, Tic)
     # Obtaining the best feasible path's portion on the first sphere
-    mintype_sp1, minlen_sp1, _, minlen_sp1_path_points_x, minlen_sp1_path_points_y, minlen_sp1_path_points_z, minlen_sp1_Tx, minlen_sp1_Ty, minlen_sp1_Tz =\
-        optimal_path_sphere_three_seg(ini_config_sphere, fin_config_sphere, r, R, vis_int, filename_sp)
+    _, _, _, minlen_sp1_path_points_x, minlen_sp1_path_points_y, minlen_sp1_path_points_z, minlen_sp1_Tx, minlen_sp1_Ty, minlen_sp1_Tz =\
+        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = 1, filename = filename_sp)[0:9]
     
     # Obtaining variables for plotting on the cylinder
     filename_cyc = "cyc_optimal.html"    
-    minlen_cyc, mintype_cyc, points_body_cyc = generate_visualize_path(PicB, TicB, R, PocB, TocB,\
-                                                                        ht_cylinder, vis_int, r, filename_cyc)
+    _, _, points_body_cyc, tang_body_cyc, norm_vect_body_cyc = generate_visualize_path(PicB, TicB, R, PocB, TocB,\
+                                                                        ht_cylinder, vis_int, r_cyc, path_config = 1, filename = filename_cyc)
     
     # Obtaining variables for plotting on the last sphere
-    filename_sp = "sp_2_optimal.html"    
+    filename_sp = "sp_2_optimal.html"
     # Obtaining the configuration on the last sphere
     ini_config_sphere = config_sphere(Poc, center_fin_sphere, Toc)
     fin_config_sphere = config_sphere(fin_config[0, :], center_fin_sphere, fin_config[1, :])
     # Obtaining the best feasible path's portion on the second sphere
-    mintype_sp2, minlen_sp2, _, minlen_sp2_path_points_x, minlen_sp2_path_points_y, minlen_sp2_path_points_z, minlen_sp2_Tx, minlen_sp2_Ty, minlen_sp2_Tz =\
-        optimal_path_sphere_three_seg(ini_config_sphere, fin_config_sphere, r, R, vis_int, filename_sp)
+    _, _, _, minlen_sp2_path_points_x, minlen_sp2_path_points_y, minlen_sp2_path_points_z, minlen_sp2_Tx, minlen_sp2_Ty, minlen_sp2_Tz =\
+        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = 1, filename = filename_sp)[0:9]
             
     # Finding the global points of the path on the first sphere using a coordinate transformation
     points_global = np.empty((len(minlen_sp1_path_points_x) + len(points_body_cyc) + len(minlen_sp2_path_points_x), 3))
@@ -273,20 +311,26 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
     tang_normal_global = np.empty((len(minlen_sp1_path_points_x) + len(points_body_cyc) + len(minlen_sp2_path_points_x), 3))
     surf_normal_global = np.empty((len(minlen_sp1_path_points_x) + len(points_body_cyc) + len(minlen_sp2_path_points_x), 3))
 
-    # For the surface normal, depending on whether an inner-inner or outer-outer connection is considered, the sign will differ
-    if type == 'outer': sign = 1
-    else: sign = -1
-
     for i in range(len(minlen_sp1_path_points_x)):
 
         points_global[i, 0] = minlen_sp1_path_points_x[i] + center_ini_sphere[0]
         points_global[i, 1] = minlen_sp1_path_points_y[i] + center_ini_sphere[1]
         points_global[i, 2] = minlen_sp1_path_points_z[i] + center_ini_sphere[2]
         tang_global[i, 0] = minlen_sp1_Tx[i]; tang_global[i, 1] = minlen_sp1_Ty[i]; tang_global[i, 2] = minlen_sp1_Tz[i]
-        surf_normal_global[i, 0] = sign*minlen_sp1_path_points_x[i]/R;
-        surf_normal_global[i, 1] = sign*minlen_sp1_path_points_y[i]/R;
-        surf_normal_global[i, 2] = sign*minlen_sp1_path_points_z[i]/R;
-        tang_normal_global[i, :] = np.cross(surf_normal_global[i], tang_global[i])
+        
+        if sign != 0: # In this case, inner and outer spheres have been considered
+
+            surf_normal_global[i, 0] = sign*minlen_sp1_path_points_x[i]/R;
+            surf_normal_global[i, 1] = sign*minlen_sp1_path_points_y[i]/R;
+            surf_normal_global[i, 2] = sign*minlen_sp1_path_points_z[i]/R;
+            tang_normal_global[i, :] = np.cross(surf_normal_global[i], tang_global[i])
+
+        else:
+
+            tang_normal_global[i, 0] = -lrsign*minlen_sp1_path_points_x[i]/R;
+            tang_normal_global[i, 1] = -lrsign*minlen_sp1_path_points_y[i]/R;
+            tang_normal_global[i, 2] = -lrsign*minlen_sp1_path_points_z[i]/R;
+            surf_normal_global[i, :] = np.cross(tang_global[i], tang_normal_global[i])
 
     # Finding the global points of the path on the cylinder using a coordinate
     # transformation
@@ -295,12 +339,20 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
     
         ind = i + sp1_pts_length
         points_global[ind, :] = np.matmul(R_comp, points_body_cyc[i, :]) + center_ini_sphere
-        # TODO: Determine the expressions for the tangent vector, tangent normal, and surface normal vectors on the cylinder
-        tang_global[ind, 0] = 0; tang_global[ind, 1] = 0; tang_global[ind, 2] = 0
-        surf_normal_global[ind, 0] = 0;
-        surf_normal_global[ind, 1] = 0;
-        surf_normal_global[ind, 2] = 0;
-        tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+        # Determining the expressions for the tangent vector, tangent normal, and surface normal vectors on the cylinder
+        tang_global[ind, :] = np.matmul(R_comp, tang_body_cyc[i, :])
+        # surf_normal_global[ind, :] = np.matmul(R_comp, sign*norm_vect_body_cyc[i, :])
+        # tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+
+        if sign != 0:
+
+            surf_normal_global[ind, :] = np.matmul(R_comp, sign*norm_vect_body_cyc[i, :])
+            tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+
+        else:
+
+            tang_normal_global[ind, :] = np.matmul(R_comp, -lrsign*norm_vect_body_cyc[i, :])
+            surf_normal_global[ind, :] = np.cross(tang_global[ind], tang_normal_global[ind])
 
     # Finding the global points of the path on the last sphere using a coordinate transformation
     sp1_pls_cyl_points_length = len(points_body_cyc) + sp1_pts_length
@@ -311,10 +363,24 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
         points_global[ind, 1] = minlen_sp2_path_points_y[i] + center_fin_sphere[1]
         points_global[ind, 2] = minlen_sp2_path_points_z[i] + center_fin_sphere[2]
         tang_global[ind, 0] = minlen_sp2_Tx[i]; tang_global[ind, 1] = minlen_sp2_Ty[i]; tang_global[ind, 2] = minlen_sp2_Tz[i]
-        surf_normal_global[ind, 0] = sign*minlen_sp2_path_points_x[i]/R;
-        surf_normal_global[ind, 1] = sign*minlen_sp2_path_points_y[i]/R;
-        surf_normal_global[ind, 2] = sign*minlen_sp2_path_points_z[i]/R;
-        tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+        
+        # surf_normal_global[ind, 0] = sign*minlen_sp2_path_points_x[i]/R;
+        # surf_normal_global[ind, 1] = sign*minlen_sp2_path_points_y[i]/R;
+        # surf_normal_global[ind, 2] = sign*minlen_sp2_path_points_z[i]/R;
+        # tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+        if sign != 0: # In this case, inner and outer spheres have been considered
+
+            surf_normal_global[ind, 0] = sign*minlen_sp2_path_points_x[i]/R;
+            surf_normal_global[ind, 1] = sign*minlen_sp2_path_points_y[i]/R;
+            surf_normal_global[ind, 2] = sign*minlen_sp2_path_points_z[i]/R;
+            tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
+
+        else:
+
+            tang_normal_global[ind, 0] = -lrsign*minlen_sp2_path_points_x[i]/R;
+            tang_normal_global[ind, 1] = -lrsign*minlen_sp2_path_points_y[i]/R;
+            tang_normal_global[ind, 2] = -lrsign*minlen_sp2_path_points_z[i]/R;
+            surf_normal_global[ind, :] = np.cross(tang_global[ind], tang_normal_global[ind])
     
     if visualization == 1:
     
@@ -326,7 +392,26 @@ def Path_generation_sphere_cylinder_sphere(ini_config, fin_config, center_ini_sp
         
         # Plotting the path
         plot_figure.scatter_3D(points_global[:, 0], points_global[:, 1], points_global[:, 2], 'blue', 'Optimal path')
+
+        # Plotting the configuration along the path
+        # print('Plotting the configuration along the path')
+        for i in range(len(points_global)):
+
+            if np.mod(i, 40) == 39:
+
+                plot_figure.arrows_3D([points_global[i, 0]], [points_global[i, 1]], [points_global[i, 2]],\
+                                        [tang_global[i, 0]], [tang_global[i, 1]], [tang_global[i, 2]],\
+                                        'orange', 'oranges', False, 5, 5, 4, 'n')
+                plot_figure.arrows_3D([points_global[i, 0]], [points_global[i, 1]], [points_global[i, 2]],\
+                                        [tang_normal_global[i, 0]], [tang_normal_global[i, 1]], [tang_normal_global[i, 2]],\
+                                        'purple', 'purp', False, 5, 5, 4, 'n')
+                plot_figure.arrows_3D([points_global[i, 0]], [points_global[i, 1]], [points_global[i, 2]],\
+                                        [surf_normal_global[i, 0]], [surf_normal_global[i, 1]], [surf_normal_global[i, 2]],\
+                                        'green', 'greens', False, 5, 5, 4, 'n')
                         
+        plot_figure.update_layout_3D('X (m)', 'Y (m)', 'Z (m)',\
+                                    'Best feasible path connecting ' + type + ' spheres using a cylindrical envelope')
+
         # Writing the figure on the html file
         plot_figure.writing_fig_to_html(filename, 'a')
 

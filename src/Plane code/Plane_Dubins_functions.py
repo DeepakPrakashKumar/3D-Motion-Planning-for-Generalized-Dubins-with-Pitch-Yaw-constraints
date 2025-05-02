@@ -11,6 +11,7 @@ import os
 import copy
 import matplotlib.pyplot as plt
 import sys
+import time
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
@@ -708,7 +709,7 @@ def dubins_paths(ini_config, fin_config, r, path_type = 'lsl'):
     
     return path_length, params_path
 
-def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_paths.html'):
+def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = 'plots_Dubins_paths.html'):
     '''
     This function generates the paths for 2D Dubins, and outputs the optimal path.
 
@@ -735,6 +736,7 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
 
     '''
     
+    # start_time_func = time.time()
     path_types = np.array(['lsl', 'rsr', 'lsr', 'rsl', 'lrl', 'rlr'])
     path_lengths = np.empty(len(path_types))
     path_params = np.zeros((len(path_types), 3))
@@ -754,7 +756,9 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
     for i in range(len(path_types)):
                 
         # Generating the paths
+        # start_time = time.time()
         path_lengths[i], path_params[i] = dubins_paths(ini_config, fin_config, r, path_types[i])
+        # print('Time taken for path type ', path_types[i], ' is ', time.time() - start_time)
                 
         # Adding to the string to be printed if the path exists
         if np.isnan(path_lengths[i]) == False and filename != False:
@@ -772,8 +776,17 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
     
     # Obtaining points along the optimal paths for 2D Dubins
     path_params_opt = path_params[np.nanargmin(path_lengths)]
-    pts_path_x_coords_opt, pts_path_y_coords_opt, heading_path_opt\
-        = points_path(ini_config, r, path_params_opt, opt_path_type_configs)
+
+    if path_config == 1:
+
+        pts_path_x_coords_opt, pts_path_y_coords_opt, heading_path_opt\
+            = points_path(ini_config, r, path_params_opt, opt_path_type_configs)
+        
+    else:
+
+        pts_path_x_coords_opt = []; pts_path_y_coords_opt = []; heading_path_opt = []
+    
+    # print('Time taken for finding the optimal path is ', time.time() - start_time_func)
     
     # Visualizing the paths
     if filename != False:
@@ -800,7 +813,7 @@ def optimal_dubins_path(ini_config, fin_config, r, filename = 'plots_Dubins_path
                                     'Initial and final configurations')
             
         # Writing onto the html file
-        fig_plane.writing_fig_to_html(filename, 'w')
+        fig_plane.writing_fig_to_html(filename, 'a')
         
         # Adding the details of the paths to the html file
         with open(filename, 'a') as f:

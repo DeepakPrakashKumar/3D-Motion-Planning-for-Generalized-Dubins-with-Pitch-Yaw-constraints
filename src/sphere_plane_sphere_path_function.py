@@ -29,7 +29,7 @@ from Plane_Dubins_functions import optimal_dubins_path
 os.chdir(cwd)
 
 def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_sphere, center_fin_sphere,\
-                                           r, R_yaw, R_pitch, axis_plane, ht_plane, disc_no, plot_figure_configs,\
+                                           r, R_yaw, R_pitch, axis_plane, ht_plane, disc_no_loc, disc_no_heading, plot_figure_configs,\
                                            visualization = 1, filename = "temp.html", type = 'outer', vis_int = 0):
     '''
     In this function, the paths connecting a given pair of spheres (inner or outer) with
@@ -100,37 +100,58 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
     # NOTE: thetai are generated such that they are in the interval
     # [0, 2pi). Therefore, they cannot take the value of 2pi, as this will then
     # cause a redundancy.
-    thetai = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
-    phii = np.linspace(-math.pi/2, math.pi/2, disc_no)
-    phio = np.linspace(-math.pi/2, math.pi/2, disc_no)
+    thetai = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
+    phii = np.linspace(-math.pi/2, math.pi/2, disc_no_heading)
+    phio = np.linspace(-math.pi/2, math.pi/2, disc_no_heading)
 
     # We generate a random vector and orthonormalize it with respect to the axis
     # of the cylinder to obtain the x-axis using which theta is defined.
     flag = 0; counter = 0
     tol = 10**(-2) # tolerance for the dot product
+    # while flag == 0:
+
+    #     # Generating a random vector
+    #     temp = np.random.rand(3)
+
+    #     # Orthonormalizing using Gram Schmidt
+    #     if np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp) > tol:
+
+    #         # In this case, we have obtained the desired x-axis
+    #         x = (-np.dot(temp, axis_plane)*axis_plane + temp)\
+    #             /np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp)
+            
+    #         flag = 1
+
+    #     else:
+            
+    #         # We check if we have exceeded a threshold counter to ensure that we do not
+    #         # go into an infinite loop
+    #         if counter > 5:
+    #             raise Exception('Going into an infinite loop for generating the random vector')
+            
+    #         # Incrementing the counter
+    #         counter += 1
+    
+    # We consider the x, y, and z vectors and consider to orthonoramlize them
+    vect_arr = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     while flag == 0:
 
-        # Generating a random vector
-        temp = np.random.rand(3)
+        vector = vect_arr[counter]
 
-        # Orthonormalizing using Gram Schmidt
-        if np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp) > tol:
+        if np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector) > tol:
 
             # In this case, we have obtained the desired x-axis
-            x = (-np.dot(temp, axis_plane)*axis_plane + temp)\
-                /np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp)
+            x = (-np.dot(vector, axis_plane)*axis_plane + vector)\
+                /np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector)
             
             flag = 1
 
         else:
-            
-            # We check if we have exceeded a threshold counter to ensure that we do not
-            # go into an infinite loop
-            if counter > 5:
+
+            if counter < 2:
+                counter += 1
+            else:
                 raise Exception('Going into an infinite loop for generating the random vector')
-            
-            # Incrementing the counter
-            counter += 1
 
     # Plotting the configurations, spheres, and planes if visualization is 1.
     if visualization == 1:       
@@ -177,7 +198,7 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
             ini_config_plane = np.array([0, 0, phii[i]])
             fin_config_plane = np.array([math.sqrt(ht_plane**2 - 4*R**2), 0, phio[j]])
 
-            plane_path_lengths[i, j] = optimal_dubins_path(ini_config_plane, fin_config_plane, r_plane, filename_plane)[0]
+            plane_path_lengths[i, j] = optimal_dubins_path(ini_config_plane, fin_config_plane, r_plane, path_config = vis_int, filename = filename_plane)[0]
 
     # Now, we obtain the path lengths on the initial sphere
     alpha = math.acos(2*R/ht_plane)
@@ -230,7 +251,7 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
             
             filename_sp = "sp_1_thetai_" + str(i) + "_phii_" + str(j) + ".html"
             sp_1_path_lengths[i, j] =\
-                  optimal_path_sphere(ini_sphere_ini_config, ini_sphere_fin_config, r, R, vis_int, filename_sp)[1]
+                  optimal_path_sphere(ini_sphere_ini_config, ini_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
 
         for j in range(len(phio)):
             
@@ -244,7 +265,7 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
 
             filename_sp = "sp_2_thetai_" + str(i) + "_phio_" + str(j) + ".html"
             sp_2_path_lengths[i, j] =\
-                  optimal_path_sphere(fin_sphere_ini_config, fin_sphere_fin_config, r, R, vis_int, filename_sp)[1]
+                  optimal_path_sphere(fin_sphere_ini_config, fin_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
 
     min_dist = np.inf
     thetai_min = np.nan; phii_min = np.nan; phio_min = np.nan
@@ -276,21 +297,21 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
     fin_config_sphere = config_sphere(loc_ini, center_ini_sphere, T_ini)
     # Obtaining the best feasible path's portion on the first sphere
     _, _, _, minlen_sp1_path_points_x, minlen_sp1_path_points_y, minlen_sp1_path_points_z, minlen_sp1_Tx, minlen_sp1_Ty, minlen_sp1_Tz =\
-        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, "sp1_optimal_cross_tangent.html")[:9]
+        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = 1, filename = "sp1_optimal_cross_tangent.html")[:9]
     
     # Obtaining the optimal path on the final sphere
     ini_config_sphere = config_sphere(loc_fin, center_fin_sphere, T_fin)
     fin_config_sphere = config_sphere(fin_config[0, :], center_fin_sphere, fin_config[1, :])
     # Obtaining the best feasible path's portion on the second sphere
     _, _, _, minlen_sp2_path_points_x, minlen_sp2_path_points_y, minlen_sp2_path_points_z, minlen_sp2_Tx, minlen_sp2_Ty, minlen_sp2_Tz =\
-        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, "sp2_optimal_cross_tangent.html")[:9]
+        optimal_path_sphere(ini_config_sphere, fin_config_sphere, r, R, vis_int, path_config = 1, filename = "sp2_optimal_cross_tangent.html")[:9]
 
     # Obtaining the optimal path on the plane
     ini_config_plane = np.array([0, 0, phii_min])
     fin_config_plane = np.array([math.sqrt(ht_plane**2 - 4*R**2), 0, phio_min])
     if vis_int == 1: filename_plane = 'optimal_path_cross_tangent_plane.html'
     else: filename_plane = False
-    _, _, _, pts_x, pts_y, heading_opt = optimal_dubins_path(ini_config_plane, fin_config_plane, r, filename_plane)
+    _, _, _, pts_x, pts_y, heading_opt = optimal_dubins_path(ini_config_plane, fin_config_plane, r, path_config = 1, filename = filename_plane)
 
     # Finding the global points of the path on the first sphere using a coordinate transformation
     # points_global_sp1 = np.empty((len(minlen_sp1_path_points_x), 3))

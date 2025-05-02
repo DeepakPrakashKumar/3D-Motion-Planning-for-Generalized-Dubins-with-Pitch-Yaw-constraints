@@ -17,6 +17,7 @@ import os
 # from Cylinder_2D_Dubins_functions import generate_random_configs_cylinder, generate_visualize_path_simple,\
 #     transformation_point_2D
 from Cylinder_2D_Dubins_functions_simple import *
+import time
 # import Cylinder_2D_Dubins_functions as Cf
 # import Cylinder_2D_Dubins_functions_simple as Cf
 
@@ -32,7 +33,10 @@ ini_pos, ini_tang_vect, final_pos, final_tang_vect = generate_random_configs_cyl
 # transformation_point_2D(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, 1, 20)
 # generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 2, rad_tight_turn, 'test_old.html')
 # Cf.generate_visualize_path_simple(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 2, rad_tight_turn, 'test_new.html')
-generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 1, rad_tight_turn, 'test.html')
+
+start_time = time.time()
+generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 0, rad_tight_turn, path_config = 0, filename = False)
+print('Time taken is ', time.time() - start_time)
 
 # path = 'D:\TAMU\Research\Cylinder code'
 

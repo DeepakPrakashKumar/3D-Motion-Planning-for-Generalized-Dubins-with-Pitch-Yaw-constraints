@@ -26,7 +26,7 @@ from Path_generation_sphere import optimal_path_sphere, generate_points_sphere
 os.chdir(cwd)
 
 def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphere, center_fin_sphere,\
-                                           r, R, axis_plane, dist_center_spheres, disc_no, plot_figure_configs,\
+                                           r, R, axis_plane, dist_center_spheres, disc_no_loc, disc_no_heading, plot_figure_configs,\
                                            visualization = 1, filename = "temp.html", type = 'outer', vis_int = 0):
     '''
     In this function, the paths connecting a given pair of spheres (inner or outer) with
@@ -83,9 +83,9 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
     # Discretizing the angle for parameterizing the intermediary sphere and the
     # angles for the tangent vector for exit from initial sphere and entry into final
     # sphere
-    theta = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
-    phiic = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
-    phifc = np.linspace(0, 2*math.pi, disc_no, endpoint = False)
+    theta = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
+    phiic = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
+    phifc = np.linspace(0, 2*math.pi, disc_no_loc, endpoint = False)
 
     # Obtaining the angle to describe the locus of the intermediary sphere
     phi = math.acos(dist_center_spheres/(4*R))
@@ -94,29 +94,50 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
     # initial and final spheres.
     flag = 0; counter = 0
     tol = 10**(-2) # tolerance for the dot product
+    # while flag == 0:
+
+    #     # Generating a random vector
+    #     temp = np.random.rand(3)
+
+    #     # Orthonormalizing using Gram Schmidt
+    #     if np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp) > tol:
+
+    #         # In this case, we have obtained the desired x-axis
+    #         x = (-np.dot(temp, axis_plane)*axis_plane + temp)\
+    #             /np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp)
+            
+    #         flag = 1
+
+    #     else:
+            
+    #         # We check if we have exceeded a threshold counter to ensure that we do not
+    #         # go into an infinite loop
+    #         if counter > 5:
+    #             raise Exception('Going into an infinite loop for generating the random vector')
+            
+    #         # Incrementing the counter
+    #         counter += 1
+
+    # We consider the x, y, and z vectors and consider to orthonoramlize them
+    vect_arr = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
     while flag == 0:
 
-        # Generating a random vector
-        temp = np.random.rand(3)
+        vector = vect_arr[counter]
 
-        # Orthonormalizing using Gram Schmidt
-        if np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp) > tol:
+        if np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector) > tol:
 
             # In this case, we have obtained the desired x-axis
-            x = (-np.dot(temp, axis_plane)*axis_plane + temp)\
-                /np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp)
+            x = (-np.dot(vector, axis_plane)*axis_plane + vector)\
+                /np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector)
             
             flag = 1
 
         else:
-            
-            # We check if we have exceeded a threshold counter to ensure that we do not
-            # go into an infinite loop
-            if counter > 5:
+
+            if counter < 2:
+                counter += 1
+            else:
                 raise Exception('Going into an infinite loop for generating the random vector')
-            
-            # Incrementing the counter
-            counter += 1
 
     # Plotting the configurations and spheres if visualization is 1.
     if visualization == 1:       
@@ -164,11 +185,11 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
         # Now, we obtain the location corresponding to exit from the initial sphere
         # and entry onto the final sphere
         Xic = 0.5*(center_ini_sphere + Xcthetac)
-        Xfc = 0.5*(center_fin_sphere + Xcthetac)
+        Xoc = 0.5*(center_fin_sphere + Xcthetac)
 
         # We now obtain the vectors for parameterizing the tangent vector
         xic = axis_plane/sin(phi) - (Xic - center_ini_sphere)/(R*math.tan(phi))
-        xfc = -axis_plane/sin(phi) - (Xfc - center_fin_sphere)/(R*math.tan(phi))
+        xoc = -axis_plane/sin(phi) - (Xoc - center_fin_sphere)/(R*math.tan(phi))
 
         # We run through for loops to compute the paths for the spheres
         for (j, phiic_val) in enumerate(phiic):
@@ -184,30 +205,30 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
             # print('Location on sphere is ', fin_config[0, :], ' and center is ', center_ini_sphere, '. Norm is ', np.linalg.norm(fin_config[0, :] - center_ini_sphere))
             
             sp1_path_lengths[i, j] =\
-                  optimal_path_sphere(ini_config_sp1, fin_config_sp1, r, R, vis_int, filename_sp)[1]
+                  optimal_path_sphere(ini_config_sp1, fin_config_sp1, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
 
             for (k, phifc_val) in enumerate(phifc):
 
                 # We obtain the tangent vector at the final sphere
-                Tfc = cos(phifc_val)*xfc + sin(phifc_val)*(1/R)*np.cross(Xfc - center_fin_sphere, xfc)
+                Toc = cos(phifc_val)*xoc + sin(phifc_val)*(1/R)*np.cross(Xoc - center_fin_sphere, xoc)
 
                 # We compute the path on the final sphere if not already computed
-                ini_config_sp2 = config_sphere(Xfc, center_fin_sphere, Tfc)
+                ini_config_sp2 = config_sphere(Xoc, center_fin_sphere, Toc)
                 fin_config_sp2 = config_sphere(fin_config[0, :], center_fin_sphere, fin_config[1, :])
                 filename_sp = "sp_2_thetai_" + str(i) + "_phifc_" + str(k) + ".html"
 
                 if np.isnan(sp2_path_lengths[i, k]):
 
                     sp2_path_lengths[i, k] =\
-                          optimal_path_sphere(ini_config_sp2, fin_config_sp2, r, R, vis_int, filename_sp)[1]
+                          optimal_path_sphere(ini_config_sp2, fin_config_sp2, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
                     
                 # We compute the path length on the intermediary sphere as well
                 ini_config_spint = config_sphere(Xic, Xcthetac, Tic)
-                fin_config_spint = config_sphere(Xfc, Xcthetac, Tfc)
+                fin_config_spint = config_sphere(Xoc, Xcthetac, Toc)
                 filename_sp = "sp_int_thetai_" + str(i) + "_phiic_" + str(j) + "_phifc_" + str(k) + ".html"
 
                 spint_path_lengths[i, j, k] =\
-                      optimal_path_sphere(ini_config_spint, fin_config_spint, r, R, vis_int, filename_sp)[1]
+                      optimal_path_sphere(ini_config_spint, fin_config_spint, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
                 
     # We now pick the best path
     min_dist = np.inf
@@ -229,16 +250,19 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
     # Now, we obtain the location corresponding to exit from the initial sphere
     # and entry onto the final sphere
     Xic = 0.5*(center_ini_sphere + Xcthetac)
-    Xfc = 0.5*(center_fin_sphere + Xcthetac)
+    Xoc = 0.5*(center_fin_sphere + Xcthetac)
 
     # We now obtain the vectors for parameterizing the tangent vector
     xic = axis_plane/sin(phi) - (Xic - center_ini_sphere)/(R*math.tan(phi))
-    xfc = -axis_plane/sin(phi) - (Xfc - center_fin_sphere)/(R*math.tan(phi))
+    xoc = -axis_plane/sin(phi) - (Xoc - center_fin_sphere)/(R*math.tan(phi))
+
+    # print('Norm of xic and xoc are ', np.linalg.norm(xic), np.linalg.norm(xoc))
+    # print('Dot product of xic and xoc with the position is ', np.dot(xic, Xic - center_ini_sphere), np.dot(xoc, Xoc - center_fin_sphere))
 
     # We obtain the tangent vector at the initial sphere
     Tic = cos(phiic_min)*xic + sin(phiic_min)*(1/R)*np.cross(Xic - center_ini_sphere, xic)
     # We obtain the tangent vector at the final sphere
-    Tfc = cos(phifc_min)*xfc + sin(phifc_min)*(1/R)*np.cross(Xfc - center_fin_sphere, xfc)
+    Toc = cos(phifc_min)*xoc + sin(phifc_min)*(1/R)*np.cross(Xoc - center_fin_sphere, xoc)
 
     # Obtaining the optimal path on all three spheres
     # Initial sphere
@@ -246,23 +270,23 @@ def Path_generation_sphere_sphere_sphere(ini_config, fin_config, center_ini_sphe
     fin_config_sp1 = config_sphere(Xic, center_ini_sphere, Tic)
     filename_sp = "sp_1_optimal" + ".html"
     _, _, _, minlen_sp1_path_points_x, minlen_sp1_path_points_y, minlen_sp1_path_points_z, minlen_sp1_Tx, minlen_sp1_Ty, minlen_sp1_Tz =\
-            optimal_path_sphere(ini_config_sp1, fin_config_sp1, r, R, vis_int, filename_sp)[0:9]
+            optimal_path_sphere(ini_config_sp1, fin_config_sp1, r, R, vis_int, path_config = 1, filename = filename_sp)[0:9]
     
     # Intermediary sphere
     ini_config_spint = config_sphere(Xic, Xcthetac, Tic)
-    fin_config_spint = config_sphere(Xfc, Xcthetac, Tfc)
+    fin_config_spint = config_sphere(Xoc, Xcthetac, Toc)
     filename_sp = "sp_int_optimal" + ".html"
 
     _, _, _, minlen_spint_path_points_x, minlen_spint_path_points_y, minlen_spint_path_points_z, minlen_spint_Tx, minlen_spint_Ty, minlen_spint_Tz =\
-            optimal_path_sphere(ini_config_spint, fin_config_spint, r, R, vis_int, filename_sp)[0:9]
+            optimal_path_sphere(ini_config_spint, fin_config_spint, r, R, vis_int, path_config = 1, filename = filename_sp)[0:9]
     
     # Final sphere
-    ini_config_sp2 = config_sphere(Xfc, center_fin_sphere, Tfc)
+    ini_config_sp2 = config_sphere(Xoc, center_fin_sphere, Toc)
     fin_config_sp2 = config_sphere(fin_config[0, :], center_fin_sphere, fin_config[1, :])
     filename_sp = "sp_2_optimal" + ".html"
 
     _, _, _, minlen_sp2_path_points_x, minlen_sp2_path_points_y, minlen_sp2_path_points_z, minlen_sp2_Tx, minlen_sp2_Ty, minlen_sp2_Tz =\
-            optimal_path_sphere(ini_config_sp2, fin_config_sp2, r, R, vis_int, filename_sp)[0:9]
+            optimal_path_sphere(ini_config_sp2, fin_config_sp2, r, R, vis_int, path_config = 1, filename = filename_sp)[0:9]
     
     # Finding the global points of the path on the first sphere using a coordinate transformation
     points_global = np.empty((len(minlen_sp1_path_points_x) + len(minlen_spint_path_points_x) + len(minlen_sp2_path_points_x), 3))
