@@ -95,7 +95,7 @@ def operators_segments(ini_config, phi, r, R, seg_type = 'l'):
     
     return fin_config
 
-def Seg_pts(ini_config, phi, r, R, seg_type = 'l', dist_disc = 0.2):
+def Seg_pts(ini_config, phi, r, R, seg_type = 'l', dist_disc = 1):
     '''
     This function generates points along the segment on a sphere. Moreover, the
     tangent vector at the generated points are also returned.
@@ -1459,6 +1459,9 @@ def optimal_path_sphere(ini_config, fin_config, r, R, visualization = 1, path_co
     visualization : Scalar, optional
         If equal to 1, the paths are visualized and saved in the provided filename (html file).
         If not, the paths are not visualized.
+    path_config : Scalar, optional
+        If equal to 1, the configuration of the vehicle along the path is returned. Else,
+        it is set as an empty array.
     filename : String, optional
         Defines the name of the file in which the sphere segments ought to be visualized in.
 

@@ -11,6 +11,7 @@ import math
 import copy
 import sys
 from pathlib import Path
+import time
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
@@ -23,19 +24,6 @@ path_str = str(current_directory)
 rel_path = '\Cylinder code'
 os.chdir(path_str + rel_path)
 from plotting_class import plotting_functions
-
-# # Importing code for the cylinder
-# from Cylinder_2D_Dubins_functions_simple import generate_visualize_path
-
-# # Importing code for the sphere
-# rel_path = '\Sphere code'
-# os.chdir(path_str + rel_path)
-# from Path_generation_sphere import optimal_path_sphere_three_seg, generate_points_sphere
-
-# # Importing code for the plane
-# rel_path = '\Plane code'
-# os.chdir(path_str + rel_path)
-# from Plane_Dubins_functions import optimal_dubins_path
 
 # Returning to initial directory
 os.chdir(cwd)
@@ -89,6 +77,9 @@ def generate_random_configs_3D(xlim, ylim, zlim):
     # Finding the surface normal vector
     u = np.cross(T, t)
     
+    # HERE, THE CONFIG IS NOT REPRESENTED USING A HOMOGENEOUS TRANSFORMATION MATRIX.
+    # THE FIRST ROW IS POSITION, SECOND ROW IS TANGENT VECTOR, THIRD ROW IS TANGENT
+    # NORMAL VECTOR, AND FOURTH ROW IS SURFACE NORMAL VECTOR
     config = np.array([[x_pos, y_pos, z_pos], T, t, u])
     
     return config
@@ -117,25 +108,42 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
         Radius of the sphere corresponding to when the yaw rate is its maximum absolute value with
         pitch rate being zero, and when pitch rate is its maximum absolute value with yaw rate
         being zero, respectively.
+    disc_no_loc, disc_no_heading : Scalars
+        Number of discretizations to be considered for the location parameter and the heading angle parameter.
     visualization : Scalar, optional
         Variable to decide whether to show the plot of the configurations and the
-        surfaces. Default is equal to 1.
+        surfaces. Default is equal to 1. If set to 1, we generate the paths in the html file, whose
+        name is given by the filename variable.
+    vis_best_surf_path : Scalar, optional
+        Variable to decide whether to show the best path for each intermediary surface picked and
+        for each selected connection. Default is equal to 1.
+    vis_int : Scalar, optional
+        Variable to decide whether to show the path for all discretizations considered for each
+        intermediary surfaces. Default is equal to 0.
     filename : String, optional
         Name of the file in which the figure should be written. Used when visualization
         is set to 1. Default is "temp.html".
 
     Returns
     -------
-    Numpy 4x3 array: Contains the center of the four spheres.
-    Numpy 4x3 array: Contains the direction cosines of the axis corresponding to the four
-        cylinders.
-    Numpy 4x1 array: Contains the length of the four cylinders.
+    min_dist_path : Scalar
+        Length of the shortest path from the heuristic.
+    min_dist_path_pts : Numpy array
+        Contains the points corresponding to the best path through the surfaces.
+    tang_global_path : Numpy array
+        Contains the tangent vectors corresponding to the best path through the surfaces.
+    tang_normal_global_path : Numpy array
+        Contains the tangent normal vectors corresponding to the best path through the surfaces.
+    surf_normal_global_path : Numpy array
+        Contains the surface normal vectors corresponding to the best path through the surfaces.
+    path_type : String
+        Contains the type of the best path through the surfaces.
 
     '''
     
     print('Computing feasible paths through different surfaces.')
     # Computing the center of the inner and outer spheres at the initial and final
-    # configurations    
+    # configurations
     ini_loc_inner_sp = ini_config[0, :] + R_pitch*ini_config[3, :]
     ini_loc_outer_sp = ini_config[0, :] - R_pitch*ini_config[3, :]
     fin_loc_inner_sp = fin_config[0, :] + R_pitch*fin_config[3, :]
@@ -219,10 +227,16 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
         axis = [axis_ii, axis_oo, axis_ll, axis_rr][i]
         ht = [ht_ii, ht_oo, ht_ll, ht_rr][i]
 
+        # Obtaining the best feasible path connecting spheres through a cylindrical envelope
+        # for the selected pair of spheres at the initial and final configurations
+        start_time = time.time()
         min_dist, points_glob, tang_glob, tang_normal_glob, surf_normal_glob =\
               Path_generation_sphere_cylinder_sphere(ini_config, fin_config, ini_loc_sp, fin_loc_sp, r_min, R_yaw, R_pitch,\
-                                                      axis, ht, disc_no_loc, disc_no_heading, plot_figure_configs, vis_best_surf_path, filename, conn, vis_int)
-        
+                                                      axis, ht, disc_no_loc, disc_no_heading, plot_figure_configs,\
+                                                      vis_best_surf_path, filename, conn, vis_int)
+        end_time = time.time()
+        print('The time for', conn, 'is', end_time - start_time)
+
         if min_dist < min_dist_cyc:
 
             min_dist_cyc = min_dist
@@ -243,10 +257,13 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
         axis = [axis_io, axis_oi, axis_lr, axis_rl][i]
         ht = [ht_io, ht_oi, ht_lr, ht_rl][i]
 
+        start_time = time.time()
         min_dist, points_glob, tang_glob, tang_normal_glob, surf_normal_glob =\
             Path_generation_sphere_plane_sphere(ini_config, fin_config, ini_loc_sp, fin_loc_sp, r_min, R_yaw, R_pitch,\
                                                       axis, ht, disc_no_loc, disc_no_heading, plot_figure_configs, vis_best_surf_path, filename, conn, vis_int)
-        
+        end_time = time.time()
+        print('The time for', conn, 'is', end_time - start_time)
+
         if min_dist < min_dist_cross:
 
             min_dist_cross = min_dist
@@ -261,7 +278,6 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
     for (i, conn) in enumerate(['inner', 'outer', 'left', 'right']):
 
         # print('Connection for spheres is ', conn)
-
         ini_loc_sp = [ini_loc_inner_sp, ini_loc_outer_sp, ini_loc_left_sp, ini_loc_right_sp][i]
         fin_loc_sp = [fin_loc_inner_sp, fin_loc_outer_sp, fin_loc_left_sp, fin_loc_right_sp][i]
 
@@ -276,10 +292,13 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
 
             R = R_yaw
 
+        start_time = time.time()
         min_dist, points_glob, tang_glob, tang_normal_glob, surf_normal_glob =\
             Path_generation_sphere_sphere_sphere(ini_config, fin_config, ini_loc_sp, fin_loc_sp, r_min, R, axis, ht,\
                                                   disc_no_loc, disc_no_heading, plot_figure_configs, vis_best_surf_path, filename, conn, vis_int)
-        
+        end_time = time.time()
+        print('The time for', conn, 'is', end_time - start_time)
+
         if min_dist < min_dist_sphere:
 
             min_dist_sphere = min_dist
@@ -340,12 +359,13 @@ def Dubins_3D_numerical_path_on_surfaces(ini_config, fin_config, r_min, R_yaw, R
                                'False', 0.7)
         
         # Plotting the path
-        plot_figure.scatter_3D(min_dist_path_pts[:, 0], min_dist_path_pts[:, 1], min_dist_path_pts[:, 2], 'blue', 'Best path')
+        plot_figure.scatter_3D(min_dist_path_pts[:, 0], min_dist_path_pts[:, 1], min_dist_path_pts[:, 2],\
+                                'blue', 'Best path')
             
         plot_figure.update_layout_3D('X (m)', 'Y (m)', 'Z (m)', 'Visualization of best path')
         
         # Writing the figure on the html file
         plot_figure.writing_fig_to_html(filename, 'a')
-
     
-    return min_dist_path, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type
+    return min_dist_path, min_dist_path_pts, tang_global_path, tang_normal_global_path,\
+          surf_normal_global_path, path_type

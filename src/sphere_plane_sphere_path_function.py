@@ -4,6 +4,7 @@ import copy
 import os
 import sys
 from pathlib import Path
+from joblib import Parallel, delayed
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
@@ -58,10 +59,10 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         Axis of the line connecting the centers of the two spheres.
     ht_plane : Scalar
         Length of the plane connecting the considered pair of spheres.
-    disc_no : Scalar
+    disc_no_loc, disc_no_heading : Scalar
         Number of discretizations in theta and phi considered, where theta represents
-        the angle on the base and top of the cylinder, and phi represents heading angle
-        at the base and top of the cylinder.
+        the angle that dictates the plane that is chosen, and phi represents heading angle
+        at the base and top of the plane.
     plot_figure_configs : Plotly figure handle
         Figure handle corresponding to the plotly figure generated, which is utilized and
         updated if visualization = 1.
@@ -76,18 +77,33 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
 
     Returns
     -------
-
+    min_dist : Scalar
+        Length of the shortest path connecting the two chosen spheres using a cross-tangent plane.
+    points_global : Numpy array
+        Contains the points along the shortest path connecting the two chosen spheres using a cross-tangent plane.
+    tang_global : Numpy array
+        Contains the direction cosines of the tangent vector in the global frame of the shortest path
+        connecting the two chosen spheres using a cross-tangent plane.
+    tang_normal_global : Numpy array
+        Contains the direction cosines of the tangent normal vector in the global frame of the shortest path
+        connecting the two chosen spheres using a cross-tangent plane.
+    surf_normal_global : Numpy array
+        Contains the direction cosines of the surface normal vector in the global frame of the shortest path
+        connecting the two chosen spheres using a cross-tangent plane.
+    
     '''
 
     # We first check if the considered connections exist
     # For the surface normal, depending on whether the first sphere is inner or outer, the sign will differ
     # if type == 'outer': sign = 1
     # else: sign = -1
-    if type == 'outer': sign = 1; lrsign = 0
+    if type == 'outer': sign = 1; lrsign = 0 # "sign" is opposite to what we chose in the paper.
+    # However, we account for this change in the code.
     elif type == 'inner': sign = -1; lrsign = 0
     elif type == 'left': lrsign = 1; sign = 0
     else: lrsign = -1; sign = 0
 
+    # We compute the radius of the sphere
     R = abs(sign)*R_pitch + abs(lrsign)*R_yaw
 
     # We compute the radius of turn on the plane
@@ -108,29 +124,6 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
     # of the cylinder to obtain the x-axis using which theta is defined.
     flag = 0; counter = 0
     tol = 10**(-2) # tolerance for the dot product
-    # while flag == 0:
-
-    #     # Generating a random vector
-    #     temp = np.random.rand(3)
-
-    #     # Orthonormalizing using Gram Schmidt
-    #     if np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp) > tol:
-
-    #         # In this case, we have obtained the desired x-axis
-    #         x = (-np.dot(temp, axis_plane)*axis_plane + temp)\
-    #             /np.linalg.norm(-np.dot(temp, axis_plane)*axis_plane + temp)
-            
-    #         flag = 1
-
-    #     else:
-            
-    #         # We check if we have exceeded a threshold counter to ensure that we do not
-    #         # go into an infinite loop
-    #         if counter > 5:
-    #             raise Exception('Going into an infinite loop for generating the random vector')
-            
-    #         # Incrementing the counter
-    #         counter += 1
     
     # We consider the x, y, and z vectors and consider to orthonoramlize them
     vect_arr = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
@@ -140,7 +133,7 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
 
         if np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector) > tol:
 
-            # In this case, we have obtained the desired x-axis
+            # In this case, we have obtained the desired x-axis for the body frame
             x = (-np.dot(vector, axis_plane)*axis_plane + vector)\
                 /np.linalg.norm(-np.dot(vector, axis_plane)*axis_plane + vector)
             
@@ -176,104 +169,49 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         # Writing the figure on the html file
         plot_figure.writing_fig_to_html(filename, 'a')
 
-    # Defining empty arrays to hold the path length for each discretization set
-    sp_1_path_lengths = np.empty((len(thetai), len(phii)))
-    sp_1_path_lengths[:] = np.NaN
-    sp_2_path_lengths = np.empty((len(thetai), len(phio)))
-    sp_2_path_lengths[:] = np.NaN
-    plane_path_lengths = np.empty((len(phii), len(phio))) # Note that for plane, it depends on only the delta phi.
-    plane_path_lengths[:] = np.NaN
-
     # Final array to store path lengths for all configurations
-    path_lengths = np.empty((len(thetai), len(phii), len(phio)))
+    path_lengths = np.zeros((len(thetai), len(phii), len(phio)))
 
-    # First, we obtain the path length on the plane
-    for i in range(len(phii)):
-        for j in range(len(phio)):
+    # Storing the configuration corresponding to the minimum path length
+    min_dist = np.infty; thetai_min = 0; phii_min = 0; phio_min = 0
 
-            if vis_int == 0: filename_plane = False
-            else: filename_plane = "plane_phii_" + str(i) + "_phio_" + str(j) + ".html"
-
-            # We obtain the initial and final configuration on the plane
-            ini_config_plane = np.array([0, 0, phii[i]])
-            fin_config_plane = np.array([math.sqrt(ht_plane**2 - 4*R**2), 0, phio[j]])
-
-            plane_path_lengths[i, j] = optimal_dubins_path(ini_config_plane, fin_config_plane, r_plane, path_config = vis_int, filename = filename_plane)[0]
-
-    # Now, we obtain the path lengths on the initial sphere
+    # Parameter for describing configuration on initial and final spheres
     alpha = math.acos(2*R/ht_plane)
-    
+
     # We generate the y axis, centered at the center of the sphere at the initial configuration
     y = np.cross(axis_plane, x)
 
-    for i in range(len(thetai)):
+    # Now, we run the tasks in parallel for path length computation on the plane and the spheres
+    ini_sphere_results = Parallel(n_jobs=-1, prefer="processes")(delayed(compute_path_ini_sphere)(i, j, thetai[i], phii[j], R, center_ini_sphere,\
+                                                                                                  center_fin_sphere, r, vis_int, ini_config[0, :],\
+                                                                                                  ini_config[1, :], alpha, axis_plane, x, y)\
+                                                                                                  for i in range(len(thetai)) for j in range(len(phii)))
+    plane_results = Parallel(n_jobs=-1, prefer="processes")(delayed(compute_path_plane)(i, j, phii[i], phio[j], ht_plane, r_plane, R, vis_int)\
+                                                             for i in range(len(phii)) for j in range(len(phio)))
+    fin_sphere_results = Parallel(n_jobs=-1, prefer="processes")(delayed(compute_path_fin_sphere)(i, j, thetai[i], phio[j], R, center_ini_sphere,\
+                                                                                                center_fin_sphere, r, vis_int, fin_config[0, :],\
+                                                                                                fin_config[1, :], alpha, axis_plane, x, y)\
+                                                                                                for i in range(len(thetai)) for j in range(len(phio)))
 
-        # Obtaining the configuration for the sphere
-        # print('Center of ini sphere', center_ini_sphere, ' axis plane is ', axis_plane, 'x is ', x)
-        loc_ini = center_ini_sphere + R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(thetai[i])*x + math.sin(thetai[i])*y)
-        # Obtaining the location corresponding to the exit sphere
-        loc_fin = center_fin_sphere - R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(thetai[i] + math.pi)*x \
-                + math.sin(thetai[i] + math.pi)*y)
-
-        # Obtaining the tangent vector
-        t = (loc_fin - loc_ini)/np.linalg.norm(loc_fin - loc_ini)
-
-        for j in range(len(phii)):
-            
-            # Tangent vector for exit from sphere at initial configuration
-            T_ini = math.cos(phii[j])*t + math.sin(phii[j])*(np.cross((loc_ini - center_ini_sphere)/R, t))
-
-            # Now, we construct the configuration for planning on the initial sphere
-            # ini_sphere_ini_loc = np.array([ini_config[0, i] - center_ini_sphere[i] for i in range(3)])
-            # ini_sphere_ini_tang = np.array([ini_config[1, i] for i in range(3)])
-            # ini_sphere_ini_tang_norm = np.cross(ini_sphere_ini_loc, ini_sphere_ini_tang)/R
-            # ini_sphere_ini_config = np.array([[ini_sphere_ini_loc[0], ini_sphere_ini_tang[0], ini_sphere_ini_tang_norm[0]],\
-            #                                   [ini_sphere_ini_loc[1], ini_sphere_ini_tang[1], ini_sphere_ini_tang_norm[1]],\
-            #                                   [ini_sphere_ini_loc[2], ini_sphere_ini_tang[2], ini_sphere_ini_tang_norm[2]]])
-            
-            ini_sphere_ini_config = config_sphere(ini_config[0, :], center_ini_sphere, ini_config[1, :])
-
-            # print('Radius of sphere is ', R, ' and norm of distance is ', np.linalg.norm(ini_sphere_ini_config[:, 0]))
-
-            # Now, we construct the configuration for exit on the initial sphere
-            # ini_sphere_fin_loc = loc_ini - center_ini_sphere
-            # ini_sphere_fin_tang_norm = np.cross((loc_ini - center_ini_sphere)/R, T_ini)
-            # ini_sphere_fin_config = np.array([[ini_sphere_fin_loc[0], T_ini[0], ini_sphere_fin_tang_norm[0]],\
-            #                                   [ini_sphere_fin_loc[1], T_ini[1], ini_sphere_fin_tang_norm[1]],\
-            #                                   [ini_sphere_fin_loc[2], T_ini[2], ini_sphere_fin_tang_norm[2]]])
-
-            # print('Location on sphere is ', loc_ini, ' and center is ', center_ini_sphere, '. Norm is ', np.linalg.norm(loc_ini - center_ini_sphere))
-            ini_sphere_fin_config = config_sphere(loc_ini, center_ini_sphere, T_ini)
-
-            # print('Radius of sphere is ', R, ' and norm of distance is ', np.linalg.norm(ini_sphere_fin_config[:, 0]))
-
-            # print('Initial sphere ini config is ', ini_sphere_ini_config, ' and final config is ', ini_sphere_fin_config)
-            
-            filename_sp = "sp_1_thetai_" + str(i) + "_phii_" + str(j) + ".html"
-            sp_1_path_lengths[i, j] =\
-                  optimal_path_sphere(ini_sphere_ini_config, ini_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
-
-        for j in range(len(phio)):
-            
-            T_ini = math.cos(phio[j])*t + math.sin(phio[j])*(np.cross((loc_ini - center_ini_sphere)/R, t))
-
-            # Now, we construct the configuration for planning on the final sphere
-            fin_sphere_ini_config = config_sphere(loc_fin, center_fin_sphere, T_ini)
-
-            # Now, we construct the configuration for exit on the final sphere
-            fin_sphere_fin_config = config_sphere(fin_config[0, :], center_fin_sphere, fin_config[1, :])
-
-            filename_sp = "sp_2_thetai_" + str(i) + "_phio_" + str(j) + ".html"
-            sp_2_path_lengths[i, j] =\
-                  optimal_path_sphere(fin_sphere_ini_config, fin_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
-
-    min_dist = np.inf
     thetai_min = np.nan; phii_min = np.nan; phio_min = np.nan
+
+    for res in ini_sphere_results:
+        i, j = res['indices']
+        path_lengths[i, j, :] += res['length']
+
+    for res in plane_results:
+        i, j = res['indices']
+        path_lengths[:, i, j] += res['length']
+
+    for res in fin_sphere_results:
+        i, j = res['indices']
+        path_lengths[i, :, j] += res['length']
+
     for i in range(len(thetai)):
         for j in range(len(phii)):
             for k in range(len(phio)):
 
-                path_lengths[i, j, k] = sp_1_path_lengths[i, j] + plane_path_lengths[j, k] + sp_2_path_lengths[i, k]
+                # path_lengths[i, j, k] = sp_1_path_lengths[i, j] + plane_path_lengths[j, k] + sp_2_path_lengths[i, k]
                 if path_lengths[i, j, k] < min_dist:
                     
                     min_dist = path_lengths[i, j, k]
@@ -326,24 +264,19 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         points_global[i, 1] = minlen_sp1_path_points_y[i] + center_ini_sphere[1]
         points_global[i, 2] = minlen_sp1_path_points_z[i] + center_ini_sphere[2]
         tang_global[i, 0] = minlen_sp1_Tx[i]; tang_global[i, 1] = minlen_sp1_Ty[i]; tang_global[i, 2] = minlen_sp1_Tz[i]
-        
-        # surf_normal_global[i, 0] = sign*minlen_sp1_path_points_x[i]/R;
-        # surf_normal_global[i, 1] = sign*minlen_sp1_path_points_y[i]/R;
-        # surf_normal_global[i, 2] = sign*minlen_sp1_path_points_z[i]/R;
-        # tang_normal_global[i, :] = np.cross(surf_normal_global[i], tang_global[i])
 
         if sign != 0: # In this case, inner and outer spheres have been considered
 
-            surf_normal_global[i, 0] = sign*minlen_sp1_path_points_x[i]/R;
-            surf_normal_global[i, 1] = sign*minlen_sp1_path_points_y[i]/R;
-            surf_normal_global[i, 2] = sign*minlen_sp1_path_points_z[i]/R;
+            surf_normal_global[i, 0] = sign*minlen_sp1_path_points_x[i]/R; 
+            surf_normal_global[i, 1] = sign*minlen_sp1_path_points_y[i]/R; 
+            surf_normal_global[i, 2] = sign*minlen_sp1_path_points_z[i]/R; 
             tang_normal_global[i, :] = np.cross(surf_normal_global[i], tang_global[i])
 
         else:
 
-            tang_normal_global[i, 0] = -lrsign*minlen_sp1_path_points_x[i]/R;
-            tang_normal_global[i, 1] = -lrsign*minlen_sp1_path_points_y[i]/R;
-            tang_normal_global[i, 2] = -lrsign*minlen_sp1_path_points_z[i]/R;
+            tang_normal_global[i, 0] = -lrsign*minlen_sp1_path_points_x[i]/R; 
+            tang_normal_global[i, 1] = -lrsign*minlen_sp1_path_points_y[i]/R; 
+            tang_normal_global[i, 2] = -lrsign*minlen_sp1_path_points_z[i]/R; 
             surf_normal_global[i, :] = np.cross(tang_global[i], tang_normal_global[i])
 
     # Finding the global points of the path on the cross-tangent plane
@@ -405,23 +338,19 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         points_global[ind, 2] = minlen_sp2_path_points_z[i] + center_fin_sphere[2]
         tang_global[ind, 0] = minlen_sp2_Tx[i]; tang_global[ind, 1] = minlen_sp2_Ty[i]; tang_global[ind, 2] = minlen_sp2_Tz[i]
         
-        # The sign will be opposite to that of the first sphere, since inner-outer or outer-inner connection considered.
-        # surf_normal_global[ind, 0] = -sign*minlen_sp2_path_points_x[i]/R;
-        # surf_normal_global[ind, 1] = -sign*minlen_sp2_path_points_y[i]/R;
-        # surf_normal_global[ind, 2] = -sign*minlen_sp2_path_points_z[i]/R;
-        # tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
         if sign != 0: # In this case, inner and outer spheres have been considered
 
-            surf_normal_global[ind, 0] = -sign*minlen_sp2_path_points_x[i]/R;
-            surf_normal_global[ind, 1] = -sign*minlen_sp2_path_points_y[i]/R;
-            surf_normal_global[ind, 2] = -sign*minlen_sp2_path_points_z[i]/R;
+            # Sign opposite to initial sphere is considered
+            surf_normal_global[ind, 0] = -sign*minlen_sp2_path_points_x[i]/R; 
+            surf_normal_global[ind, 1] = -sign*minlen_sp2_path_points_y[i]/R; 
+            surf_normal_global[ind, 2] = -sign*minlen_sp2_path_points_z[i]/R; 
             tang_normal_global[ind, :] = np.cross(surf_normal_global[ind], tang_global[ind])
 
         else:
 
-            tang_normal_global[ind, 0] = lrsign*minlen_sp2_path_points_x[i]/R;
-            tang_normal_global[ind, 1] = lrsign*minlen_sp2_path_points_y[i]/R;
-            tang_normal_global[ind, 2] = lrsign*minlen_sp2_path_points_z[i]/R;
+            tang_normal_global[ind, 0] = lrsign*minlen_sp2_path_points_x[i]/R; 
+            tang_normal_global[ind, 1] = lrsign*minlen_sp2_path_points_y[i]/R; 
+            tang_normal_global[ind, 2] = lrsign*minlen_sp2_path_points_z[i]/R; 
             surf_normal_global[ind, :] = np.cross(tang_global[ind], tang_normal_global[ind])
 
     if visualization == 1:
@@ -429,12 +358,6 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         # Plotting the path
         plot_figure.scatter_3D(points_global[:, 0], points_global[:, 1],\
                                 points_global[:, 2], 'blue', 'Optimal path')  
-        # # Plotting the path on the cylinder
-        # plot_figure.scatter_3D(points_global_plane[:, 0], points_global_plane[:, 1],\
-        #                         points_global_plane[:, 2], 'blue', False)
-        # # Updating the figure with path on the last sphere
-        # plot_figure.scatter_3D(points_global_sp2[:, 0], points_global_sp2[:, 1],\
-        #                         points_global_sp2[:, 2], 'blue', False)
 
         for i in range(len(points_global)):
 
@@ -457,3 +380,79 @@ def Path_generation_sphere_plane_sphere(ini_config, fin_config, center_ini_spher
         plot_figure.writing_fig_to_html(filename, 'a')
 
     return min_dist, points_global, tang_global, tang_normal_global, surf_normal_global
+
+def compute_path_plane(i, j, phii, phio, ht_plane, r_plane, R, vis_int):
+
+    result = {}
+
+    if vis_int == 0: filename_plane = False
+    else: filename_plane = "plane_phii_" + str(i) + "_phio_" + str(j) + ".html"
+
+    # We obtain the initial and final configuration on the plane
+    ini_config_plane = np.array([0, 0, phii])
+    fin_config_plane = np.array([math.sqrt(ht_plane**2 - 4*R**2), 0, phio])
+    # Note that ht_plane is the distance between the center of the initial and final spheres
+
+    result['indices'] = (i, j)
+    result['length'] = optimal_dubins_path(ini_config_plane, fin_config_plane, r_plane, path_config = vis_int, filename = filename_plane)[0]
+
+    return result
+
+def compute_path_ini_sphere(i, j, theta, phi, R, center_ini_sphere, center_fin_sphere, r, vis_int, ini_loc, ini_tang, alpha, axis_plane, x, y):
+
+    result = {}
+
+    # Obtaining the configuration for the sphere
+    loc_ini = center_ini_sphere + R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(theta)*x + math.sin(theta)*y)
+    # Obtaining the location corresponding to the exit sphere
+    loc_fin = center_fin_sphere - R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(theta + math.pi)*x \
+            + math.sin(theta + math.pi)*y)
+
+    # Obtaining the tangent vector
+    t = (loc_fin - loc_ini)/np.linalg.norm(loc_fin - loc_ini)
+
+    # Tangent vector for exit from sphere at initial configuration
+    T_ini = math.cos(phi)*t + math.sin(phi)*(np.cross((loc_ini - center_ini_sphere)/R, t))
+    
+    # We now obtain the initial and final configurations for the chosen sphere at the initial configuration
+    ini_sphere_ini_config = config_sphere(ini_loc, center_ini_sphere, ini_tang)
+    ini_sphere_fin_config = config_sphere(loc_ini, center_ini_sphere, T_ini)
+
+    # print('Radius of sphere is ', R, ' and norm of distance is ', np.linalg.norm(ini_sphere_fin_config[:, 0]))
+    # print('Initial sphere ini config is ', ini_sphere_ini_config, ' and final config is ', ini_sphere_fin_config)
+    
+    filename_sp = "sp_1_thetai_" + str(i) + "_phii_" + str(j) + ".html"
+    result['indices'] = (i, j)
+    result['length'] =\
+            optimal_path_sphere(ini_sphere_ini_config, ini_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
+
+    return result
+
+def compute_path_fin_sphere(i, j, theta, phi, R, center_ini_sphere, center_fin_sphere, r, vis_int, fin_loc, fin_tang, alpha, axis_plane, x, y):
+
+    result = {}
+
+    # Obtaining the configuration for the sphere
+    loc_ini = center_ini_sphere + R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(theta)*x + math.sin(theta)*y)
+    # Obtaining the location corresponding to the exit sphere
+    loc_fin = center_fin_sphere - R*math.cos(alpha)*axis_plane + R*math.sin(alpha)*(math.cos(theta + math.pi)*x \
+            + math.sin(theta + math.pi)*y)
+
+    # Obtaining the tangent vector
+    t = (loc_fin - loc_ini)/np.linalg.norm(loc_fin - loc_ini)
+
+    # Tangent vector for entry onto sphere at final configuration
+    T_fin = math.cos(phi)*t + math.sin(phi)*(np.cross((loc_ini - center_ini_sphere)/R, t))
+
+    # Now, we construct the configuration for planning on the final sphere
+    fin_sphere_ini_config = config_sphere(loc_fin, center_fin_sphere, T_fin)
+
+    # Now, we construct the configuration for exit on the final sphere
+    fin_sphere_fin_config = config_sphere(fin_loc, center_fin_sphere, fin_tang)
+
+    filename_sp = "sp_2_thetai_" + str(i) + "_phio_" + str(j) + ".html"
+    result['indices'] = (i, j)
+    result['length'] =\
+            optimal_path_sphere(fin_sphere_ini_config, fin_sphere_fin_config, r, R, vis_int, path_config = vis_int, filename = filename_sp)[1]
+    
+    return result

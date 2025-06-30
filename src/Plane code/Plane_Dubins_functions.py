@@ -142,7 +142,7 @@ def operator_segments(start_pt_config, seg_param, rad_turn_seg, seg_type = 's'):
 
     return output_config
 
-def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's', dist_disc = 0.1):
+def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's', dist_disc = 2.0):
     '''
     This function returns an array of points corresponding to a left turn,
     right turn, or straight line segment, given the configuration corresponding
@@ -721,22 +721,31 @@ def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = '
         Contains the final configuration.
     r : Scalar
         Radius of the tight turn.
+    path_config : Scalar, optional
+        The default is 1. If value is 0, the configuration of the vehicle along the path is not generated.
     filename : String, optional
         Name of the html file in which the plots are generated. The default is
         'plots_Dubins_paths.html'. If "False" is passed, then the plot is not generated.
 
     Returns
     -------
-    path_lengths : 
-    opt_path_type_configs : 
+    opt_path_length : Scalar
+        Length of the optimal path.
+    path_params_opt : Numpy array
+        Contains the parameters of the optimal path.
+    opt_path_type_configs : String
+        Contains the path type of the optimal path.
     pts_path_x_coords_opt : Numpy Nx1 array
         Contains the x-coordinates of points along the optimal path.
     pts_path_y_coords_opt : Numpy Nx1 array
         Contains the y-coordinates of points along the optimal path.
+    heading_path_opt : Numpy Nx1 array
+        Contains the heading of the vehicle along the optimal path.
 
     '''
     
     # start_time_func = time.time()
+    # start_time = time.time()
     path_types = np.array(['lsl', 'rsr', 'lsr', 'rsl', 'lrl', 'rlr'])
     path_lengths = np.empty(len(path_types))
     path_params = np.zeros((len(path_types), 3))
@@ -758,6 +767,8 @@ def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = '
         # Generating the paths
         # start_time = time.time()
         path_lengths[i], path_params[i] = dubins_paths(ini_config, fin_config, r, path_types[i])
+        # if path_types[i] == 'lsl' and np.isnan(path_lengths[i]):
+        #     raise Exception('LSL path does not exist.')
         # print('Time taken for path type ', path_types[i], ' is ', time.time() - start_time)
                 
         # Adding to the string to be printed if the path exists
@@ -771,6 +782,7 @@ def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = '
             text_paths_file_asym_unweight.append(temp)
                 
     # Finding the optimal path type for each combination
+    # start_time = time.time()
     opt_path_length = min(path_lengths)
     opt_path_type_configs = path_types[np.nanargmin(path_lengths)]
     
@@ -785,6 +797,8 @@ def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = '
     else:
 
         pts_path_x_coords_opt = []; pts_path_y_coords_opt = []; heading_path_opt = []
+    
+    # print('Time taken for path finding is ', time.time() - start_time)
     
     # print('Time taken for finding the optimal path is ', time.time() - start_time_func)
     
@@ -878,6 +892,8 @@ def optimal_dubins_path(ini_config, fin_config, r, path_config = 1, filename = '
                 
         # Writing onto the html file
         fig_plane_path.writing_fig_to_html(filename, 'a')
-                    
+
+    # print('Time taken for finding the optimal path before returning from plane function is ', time.time() - start_time)
+
     return opt_path_length, path_params_opt, opt_path_type_configs, pts_path_x_coords_opt,\
           pts_path_y_coords_opt, heading_path_opt

@@ -2,7 +2,7 @@
 """
 Created on Sat Apr 16 20:51:56 2022
 
-@author: deepa
+@author: Deepak Prakash Kumar
 """
 
 import numpy as np
@@ -14,6 +14,7 @@ import os
 pio.renderers.default='browser'
 import copy
 import sys
+import time
 
 # Including the following command to ensure that python is able to find the relevant files afer changing directory
 sys.path.insert(0, '')
@@ -151,7 +152,7 @@ def unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, point_pos, point_tang
         raise Exception('Given position does not lie on the cylinder.')
     
     # Angle of the initial and given position corresponding to parametrization
-    # in the global frame - this angle theta corresponds to the location on the
+    # in the body frame - this angle theta corresponds to the location on the
     # profile of the cylinder. That is, a point on the profile of the cylinder
     # is parameterized using theta as (R cos(theta), R sin (theta), z).
     thetai = math.atan2(ini_pos[1], ini_pos[0])
@@ -225,6 +226,11 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
         the plots are visualized in the passed html file.
     rad_tight_turn : Scalar
         Radius of the tight circle turn.
+    path_config : Scalar
+        If equal to 1, the configuration of the vehicle along the path is returned. Else,
+        it is set as an empty array.
+    filename : String
+        Name of the file in which the cylinder segments ought to be visualized in.
 
     Returns
     -------
@@ -240,8 +246,10 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Transforming the configurations to the unwrapping plane that is defined using the body
     # frame fixed at the initial configuration
+    # start_time = time.time()
     fin_pos_plane_1, fin_pos_plane_2, heading_ini_pos_plane, heading_fin_pos_plane = \
         unwrapped_configurations_2D(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect, zmax)
+    # print("--- Unwrapping time: %s seconds ---" % (time.time() - start_time))
         
     # Generating the initial and final configurations on the unwrapping plane to pass to
     # the 2-D Dubins functions
@@ -253,10 +261,14 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
     
     # Obtaining all the information regarding the paths from the initial configuration to
     # the two images of the final configuration
+    # start_time = time.time()
     path_length_img_1, path_params_img_1, path_type_img_1, _, _, _ = \
-        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, path_config = 0, filename = False)
+        optimal_dubins_path(ini_config, fin_config_1, rad_tight_turn, path_config = path_config, filename = False)
     path_length_img_2, path_params_img_2, path_type_img_2, _, _, _ = \
-        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, path_config = 0, filename = False)
+        optimal_dubins_path(ini_config, fin_config_2, rad_tight_turn, path_config = path_config, filename = False)
+    # print("--- Dubins time: %s seconds ---" % (time.time() - start_time))
+    
+    # start_time = time.time()
     
     # print('The path lengths are ', path_length_img_1, ' and ', path_length_img_2)
     # print('The path types are ', path_type_img_1, ' and ', path_type_img_2)
@@ -484,5 +496,7 @@ def generate_visualize_path(ini_pos, ini_tang_vect, R, fin_pos, fin_tang_vect,\
                                            'Optimal path on the cylinder')
         # Writing onto the html file
         fig_cylinder_path.writing_fig_to_html(filename, 'a')
+
+    # print('Final time inside cylinder before returning is ', time.time() - start_time)
     
     return min_path_length, opt_path_type, points_path_global, tang_vect_global, normal_vect_global

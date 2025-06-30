@@ -2,24 +2,15 @@
 """
 Created on Fri Dec 31 15:16:03 2021
 
-@author: deepa
+@author: Deepak Prakash Kumar
 """
 
 import numpy as np
 import math
 import os
 
-# path = 'D:\TAMU\Research\Cylinder code'
-
-# os.chdir(path)
-
-# from Cylinder_2D_Dubins_functions_simple import generate_visualize_path, unwrapped_configurations_2D
-# from Cylinder_2D_Dubins_functions import generate_random_configs_cylinder, generate_visualize_path_simple,\
-#     transformation_point_2D
 from Cylinder_2D_Dubins_functions_simple import *
 import time
-# import Cylinder_2D_Dubins_functions as Cf
-# import Cylinder_2D_Dubins_functions_simple as Cf
 
 # Radius of the cylinder
 R = 10
@@ -30,38 +21,8 @@ zmax = 20
 rad_tight_turn = 5
 
 ini_pos, ini_tang_vect, final_pos, final_tang_vect = generate_random_configs_cylinder(R, zmax)
-# transformation_point_2D(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, 1, 20)
-# generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 2, rad_tight_turn, 'test_old.html')
-# Cf.generate_visualize_path_simple(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 2, rad_tight_turn, 'test_new.html')
 
 start_time = time.time()
-generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 0, rad_tight_turn, path_config = 0, filename = False)
-print('Time taken is ', time.time() - start_time)
-
-# path = 'D:\TAMU\Research\Cylinder code'
-
-# os.chdir(path)
-
-# Cfs.generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 1, rad_tight_turn, 'test.html')
-
-# #%%
-
-# import numpy as np
-# import math
-# import os
-
-# # path = 'D:\TAMU\Research\Cylinder code'
-
-# os.chdir(path)
-# import Cylinder_2D_Dubins_functions_simple as Cfs
-
-# # Radius of the cylinder
-# R = 10
-# # Axis of the cylinder (assumed)
-# axis = np.array([0, 0, 1])
-# # Maximum z-coordinate of randomly generated points
-# zmax = 20
-# rad_tight_turn = 5
-
-# ini_pos, ini_tang_vect, final_pos, final_tang_vect = Cfs.generate_random_configs_cylinder(R, zmax)
-# Cfs.generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 1, rad_tight_turn, 'test.html')
+length, path_type, points_path, tangents_path, normal_path = generate_visualize_path(ini_pos, ini_tang_vect, R, final_pos, final_tang_vect, zmax, 0, rad_tight_turn, path_config = 1, filename = False)
+print('Time taken is ', time.time() - start_time, '. Start time is ', start_time, ' and end time is ', time.time())
+print('Optimal path is of type ', path_type, ' with length ', length, ' and parameters ', points_path, tangents_path, normal_path)
