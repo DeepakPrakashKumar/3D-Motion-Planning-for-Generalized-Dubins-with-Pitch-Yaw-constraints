@@ -1,2 +1,15 @@
 __pycache__/
 *.pyc
+*.html
+*.tgn
+*.pickle
+Old code/
+Old results/
+Final results paper/
+Latest results/
+*_old.py
+Updated results/
+Diagrams/
+Results final paper/
+Results paper/
+Results paper reduced computation time/
