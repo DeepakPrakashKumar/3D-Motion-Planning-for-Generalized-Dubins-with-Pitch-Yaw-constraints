@@ -8,6 +8,8 @@ The main script for running the path planning algorithm is in src -> main.py. In
 
 (P.S. Stay tuned for additional detailed documentation!)
 
+For visualization, a majority of the scripts and the stl file (in Visualization folder) was taken from the mavsim_public repository (available at https://github.com/byu-magicc/mavsim_public?tab=readme-ov-file).
+
 # Dependencies
 
 pip install numpy-stl
@@ -16,3 +18,5 @@ pip install opencv-python
 pip install PyQt6 -->
 pip3 install Pillow
 pip install matplotlib (tested on versions 3.5.3, 3.7.2)
+
+DISTRIBUTION STATEMENT A. Approved for public release. Distribution is unlimited. AFRL-2025-0643; Cleared 05 Feb 2025.
