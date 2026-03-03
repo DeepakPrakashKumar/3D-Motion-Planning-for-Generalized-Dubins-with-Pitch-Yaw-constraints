@@ -39,24 +39,30 @@ mavsimPy: video making function
 import numpy as np
 import cv2
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 
 class VideoWriter():
-    def __init__(self, video_name="video.avi"):
+    def __init__(self, fig, video_name="video.avi"):
         # Initialize the video writer
         self.video_name = video_name
+        self.fig = fig
         # self.output_rate = output_rate
         self.time_of_last_frame = 0
-        
-        # Create a temporary figure to determine size
-        temp_fig = Figure()
-        temp_canvas = FigureCanvas(temp_fig)
-        temp_canvas.draw()
-        width, height = temp_canvas.get_width_height()
+
+        # Determine size from the current figure canvas (respects fullscreen)
+        width, height = self._get_canvas_size()
 
         # Define the codec and create VideoWriter object
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         self.video = cv2.VideoWriter(video_name, fourcc, 10.0, (width, height))
+        self.frame_size = (width, height)
+
+    def _get_canvas_size(self):
+        if hasattr(self.fig, "canvas") and self.fig.canvas is not None:
+            self.fig.canvas.draw()
+            return self.fig.canvas.get_width_height()
+        canvas = FigureCanvas(self.fig)
+        canvas.draw()
+        return canvas.get_width_height()
 
     def update(self, fig):
         # if (time - self.time_of_last_frame) >= self.output_rate:
@@ -66,6 +72,10 @@ class VideoWriter():
         buf = np.frombuffer(canvas.tostring_rgb(), dtype=np.uint8)
         width, height = canvas.get_width_height()
         img = buf.reshape(height, width, 3)
+
+        if (width, height) != self.frame_size:
+            # Ensure frame size matches the video writer dimensions.
+            img = cv2.resize(img, self.frame_size)
 
         # Convert RGB to BGR for OpenCV compatibility
         img_bgr = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)

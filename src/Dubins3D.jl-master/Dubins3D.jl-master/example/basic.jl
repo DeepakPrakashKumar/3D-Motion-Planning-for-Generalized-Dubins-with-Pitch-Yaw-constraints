@@ -79,6 +79,18 @@ ADDITIONAL = [
         [130, 120, 41, deg2rad(85), deg2rad(20)],
         [],
         "Additional 2"
+    ],
+    [
+        [0, 0, 0, deg2rad(30), deg2rad(10)],
+        [5, 10, 15, deg2rad(190), deg2rad(10)],
+        [],
+        "Additional 3"
+    ],
+    [
+        [0, 0, 0, deg2rad(-30), deg2rad(10)],
+        [0, -30, 5, deg2rad(190), deg2rad(10)],
+        [],
+        "Additional 4"
     ]
 ]
 
@@ -98,6 +110,7 @@ for i in 1:length(data)
     qi = d[1]
     qf = d[2]
     dubins = DubinsManeuver3D(qi, qf, rhomin, pitchmax)
+    println("Dubins output components ", dubins)
     println("Length: ", dubins.length)
 
     # maneuver = DubinsManeuver3D(qi, qf, rhomin, pitchmax)

@@ -134,4 +134,7 @@ print('The path type is ' + path_type + '. The minimum distance is', min_dist_pa
 # We now simulate the motion of a vehicle along the path that we have obtained.
 plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R_yaw, R_pitch,\
                  xgrid_size = xgrid_size, ygrid_size = ygrid_size, zgrid_size = zgrid_size, length_vec_orientation = length_vec_orientation, scale_aircraft = scale_aircraft,\
-                  elev = elev, azim = azimuth, animate = False, int_config_spacing = 45, video_name = False)
+                  elev = elev, azim = azimuth, animate = False, int_config_spacing = 45, video_name = False, full_screen = True)
+# plot_trajectory(ini_config, fin_config, min_dist_path_pts, tang_global_path, tang_normal_global_path, surf_normal_global_path, path_type, R_yaw, R_pitch,\
+#                  xgrid_size = xgrid_size, ygrid_size = ygrid_size, zgrid_size = zgrid_size, length_vec_orientation = length_vec_orientation, scale_aircraft = scale_aircraft,\
+#                   elev = elev, azim = azimuth, animate = True, video_name = "Maneuver_inside_yaw_sphere.mp4", full_screen = True)

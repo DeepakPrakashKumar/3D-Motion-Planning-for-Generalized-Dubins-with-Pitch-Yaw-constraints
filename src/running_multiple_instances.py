@@ -124,8 +124,8 @@ roll_angle_arr = [-15, 0, 15] # In degrees
 roll_angle_arr_comb = [[roll_angle_arr[0], roll_angle_arr[1]], [roll_angle_arr[1], roll_angle_arr[2]], [roll_angle_arr[2], roll_angle_arr[0]]]
 
 # We also define the number of discretizations considered
-disc_no_loc = 15
-disc_no_heading = 15
+disc_no_loc = 25
+disc_no_heading = 25
 
 for data in [DUMMY, LONG, SHORT, ADDITIONAL]:
     for i in range(len(data)):

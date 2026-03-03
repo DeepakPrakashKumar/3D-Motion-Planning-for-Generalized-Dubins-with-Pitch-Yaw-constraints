@@ -175,7 +175,8 @@ def Seg_pts(start_pt_config, seg_param_val, rad_turn_seg, seg_type = 's', dist_d
     '''
     
     # Discretizing the segment length for straight line or the angle for a tight turn
-    # segment_disc = np.linspace(0, seg_param_val, 10)
+    # segment_disc = np.linspace(0, seg_param_val, 100)
+    # num_disc = 100
     # Discretizing the angle of the turn
     if seg_type.lower() == 'l' or seg_type.lower() == 'r':
         

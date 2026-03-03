@@ -10,18 +10,24 @@ from video_writer import VideoWriter
 from msg_state import MsgState
 
 class ViewManager:
-    def __init__(self, fig,
-                 video: bool=False, 
+    def __init__(self, ax,
+                 video: bool=False,
                  animation: bool=False,
                  video_name: str=[],
                  ts_video: float=0.1,
-                 scale_aircraft: float = 3.0):
+                 scale_aircraft: float = 3.0,
+                 fig=None):
         self.video_flag = video
         self.animation_flag = animation
+        self.ax = ax
+        fig_for_video = fig
+        if fig_for_video is None and hasattr(ax, "figure"):
+            fig_for_video = ax.figure
         # initialize video 
         if self.video_flag is True:
             from video_writer import VideoWriter
             self.video = VideoWriter(
+                fig_for_video,
                 video_name=video_name
                 # bounding_box=(0, 0, 750, 750),
                 # output_rate = ts_video
@@ -31,7 +37,7 @@ class ViewManager:
             # self.app = pg.QtWidgets.QApplication([]) 
             if self.animation_flag:
                 # self.mav_view = MavViewer(app=self.app)
-                self.mav_view = MavViewer(fig, scale_aircraft)
+                self.mav_view = MavViewer(ax, scale_aircraft)
 
     def update(self, fig,
                sim_time: float,

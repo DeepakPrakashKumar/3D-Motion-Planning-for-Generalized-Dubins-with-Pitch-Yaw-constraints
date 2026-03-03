@@ -67,15 +67,18 @@ setattr(Axes3D, 'arrow3D', _arrow3D)
 def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_normal_global_path,\
                      surf_normal_global_path, path_type, Ryaw, Rpitch, xgrid_size = [-20, 20],\
                      ygrid_size = [-20, 20], zgrid_size = [-20, 20], length_vec_orientation = 5,\
-                     scale_aircraft = 3, elev = False, azim = False, int_config_spacing = 30, animate = False, video_name = False):
+                     scale_aircraft = 3, elev = False, azim = False, int_config_spacing = 30, animate = False, video_name = False,\
+                     full_screen = False):
     # In this function, the trajectory is visualized and is animated.
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(6.4,4.8))
     ax = fig.add_subplot(projection='3d')
 
     # Make figure full screen
     manager = plt.get_current_fig_manager()
-    manager.full_screen_toggle()
+    if full_screen:
+        manager.full_screen_toggle()
+        fig.canvas.draw()
 
     plt.ion()
 
@@ -83,9 +86,9 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
 
     # Setting up an object for visualizing the aircraft
     if video_name != False:
-        viewers = ViewManager(ax, animation=True, video=True, scale_aircraft=scale_aircraft, video_name = video_name)
+        viewers = ViewManager(ax, animation=True, video=True, scale_aircraft=scale_aircraft, video_name = video_name, fig=fig)
     else:
-        viewers = ViewManager(ax, animation=True, video=False, scale_aircraft=scale_aircraft, video_name = 'trajectory_aircraft.mp4')
+        viewers = ViewManager(ax, animation=True, video=False, scale_aircraft=scale_aircraft, video_name = 'trajectory_aircraft.mp4', fig=fig)
 
     # We define the length of the arrow for representing the orientation
     length = length_vec_orientation
@@ -302,7 +305,7 @@ def plot_trajectory(ini_config, fin_config, pos_global, tang_global_path, tang_n
 
     plt.ioff()  # Turn off interactive mode
 
-    plt.savefig('Maneuver_inside_right_sphere.png', dpi = 300)
+    # plt.savefig('Maneuver_inside_right_sphere.png', dpi = 300)
 
     # We show the trajectory plot
     plt.show()

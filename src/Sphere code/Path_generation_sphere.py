@@ -95,7 +95,7 @@ def operators_segments(ini_config, phi, r, R, seg_type = 'l'):
     
     return fin_config
 
-def Seg_pts(ini_config, phi, r, R, seg_type = 'l', dist_disc = 1):
+def Seg_pts(ini_config, phi, r, R, seg_type = 'l', dist_disc = 2.0):
     '''
     This function generates points along the segment on a sphere. Moreover, the
     tangent vector at the generated points are also returned.
