@@ -26,21 +26,45 @@ We consider two essential constraints: a bounded pitch rate and a bounded yaw ra
 
 ## Benchmark Paths — "Long 1"
 
-| ini roll −15°, fin roll 0°, Ryaw 40 | ini roll 0°, fin roll 15°, Ryaw 40 | ini roll 15°, fin roll −15°, Ryaw 40 |
-|:------------------------------------:|:-----------------------------------:|:-------------------------------------:|
-| <img src="src/Animations/Long+1+ini_roll+-15+fin_roll+0+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Long+1+ini_roll+0+fin_roll+15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Long+1+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> |
+**ini roll −15°, fin roll 0°, Ryaw 40**
+
+<img src="src/Animations/Long+1+ini_roll+-15+fin_roll+0+Ryaw+40.gif" width="900"/>
+
+**ini roll 0°, fin roll 15°, Ryaw 40**
+
+<img src="src/Animations/Long+1+ini_roll+0+fin_roll+15+Ryaw+40.gif" width="900"/>
+
+**ini roll 15°, fin roll −15°, Ryaw 40**
+
+<img src="src/Animations/Long+1+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="900"/>
 
 ## Benchmark Paths — "Short 4" (ini roll 15°, fin roll −15°)
 
-| Ryaw = 30 | Ryaw = 40 | Ryaw = 50 |
-|:---------:|:---------:|:---------:|
-| <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="270"/> | <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="270"/> |
+**Ryaw = 30**
+
+<img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="900"/>
+
+**Ryaw = 40**
+
+<img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="900"/>
+
+**Ryaw = 50**
+
+<img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="900"/>
 
 ## Benchmark Paths — "Additional 2" (ini roll 15°, fin roll −15°)
 
-| Ryaw = 30 | Ryaw = 40 | Ryaw = 50 |
-|:---------:|:---------:|:---------:|
-| <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="270"/> | <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="270"/> |
+**Ryaw = 30**
+
+<img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="900"/>
+
+**Ryaw = 40**
+
+<img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="900"/>
+
+**Ryaw = 50**
+
+<img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="900"/>
 
 ## Benchmark Paths — Inside-Sphere Maneuvers
 
