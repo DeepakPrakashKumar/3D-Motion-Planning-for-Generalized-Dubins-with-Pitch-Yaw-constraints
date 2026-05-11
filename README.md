@@ -10,43 +10,43 @@ A key motivation for this work is that a straight-line segment connecting two co
 
 | Roll = 0° | Roll = 45° |
 |:---------:|:----------:|
-| ![Straight motion, roll 0°](src/Animations/st_motion_heading_45_deg_pitch_0_deg_roll_0_deg.gif) | ![Straight motion, roll 45°](src/Animations/st_motion_heading_45_deg_pitch_0_deg_roll_45_deg.gif) |
+| <img src="src/Animations/st_motion_heading_45_deg_pitch_0_deg_roll_0_deg.gif" width="420"/> | <img src="src/Animations/st_motion_heading_45_deg_pitch_0_deg_roll_45_deg.gif" width="420"/> |
 
 ## Bounded Pitch and Yaw Rate Constraints
 
-We consider two essential constraints: a bounded pitch rate and a bounded yaw rate. Geometrically, these constraints manifest as four spheres surrounding each configuration — two for yaw (left turn, right turn) and two for pitch (pitch up on the inner sphere, pitch down on the outer sphere). The animations below show each of these four fundamental maneuvers.
-
-| Left Turn (yaw) | Right Turn (yaw) |
-|:---------------:|:----------------:|
-| ![Left turn on sphere](src/Animations/left_turn_sphere.gif) | ![Right turn on sphere](src/Animations/right_turn_sphere.gif) |
+We consider two essential constraints: a bounded pitch rate and a bounded yaw rate. Geometrically, these constraints manifest as four spheres surrounding each configuration — two for pitch (pitch up on the inner sphere, pitch down on the outer sphere) and two for yaw (left turn, right turn). The animations below show each of these four fundamental maneuvers.
 
 | Pitch Up (inner sphere) | Pitch Down (outer sphere) |
 |:-----------------------:|:-------------------------:|
-| ![Pitch up inner sphere](src/Animations/pitch_up_inner_sphere.gif) | ![Pitch down outer sphere](src/Animations/pitch_down_outer_sphere.gif) |
+| <img src="src/Animations/pitch_up_inner_sphere.gif" width="420"/> | <img src="src/Animations/pitch_down_outer_sphere.gif" width="420"/> |
+
+| Left Turn (yaw) | Right Turn (yaw) |
+|:---------------:|:----------------:|
+| <img src="src/Animations/left_turn_sphere.gif" width="420"/> | <img src="src/Animations/right_turn_sphere.gif" width="420"/> |
 
 ## Benchmark Paths — "Long 1"
 
 | ini roll −15°, fin roll 0°, Ryaw 40 | ini roll 0°, fin roll 15°, Ryaw 40 | ini roll 15°, fin roll −15°, Ryaw 40 |
 |:------------------------------------:|:-----------------------------------:|:-------------------------------------:|
-| ![Long 1 -15 to 0](src/Animations/Long+1+ini_roll+-15+fin_roll+0+Ryaw+40.gif) | ![Long 1 0 to 15](src/Animations/Long+1+ini_roll+0+fin_roll+15+Ryaw+40.gif) | ![Long 1 15 to -15](src/Animations/Long+1+ini_roll+15+fin_roll+-15+Ryaw+40.gif) |
+| <img src="src/Animations/Long+1+ini_roll+-15+fin_roll+0+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Long+1+ini_roll+0+fin_roll+15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Long+1+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> |
 
 ## Benchmark Paths — "Short 4" (ini roll 15°, fin roll −15°)
 
 | Ryaw = 30 | Ryaw = 40 | Ryaw = 50 |
 |:---------:|:---------:|:---------:|
-| ![Short 4 Ryaw 30](src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+30.gif) | ![Short 4 Ryaw 40](src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+40.gif) | ![Short 4 Ryaw 50](src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+50.gif) |
+| <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="270"/> | <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Short+4+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="270"/> |
 
 ## Benchmark Paths — "Additional 2" (ini roll 15°, fin roll −15°)
 
 | Ryaw = 30 | Ryaw = 40 | Ryaw = 50 |
 |:---------:|:---------:|:---------:|
-| ![Additional 2 Ryaw 30](src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+30.gif) | ![Additional 2 Ryaw 40](src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+40.gif) | ![Additional 2 Ryaw 50](src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+50.gif) |
+| <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+30.gif" width="270"/> | <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+40.gif" width="270"/> | <img src="src/Animations/Additional+2+ini_roll+15+fin_roll+-15+Ryaw+50.gif" width="270"/> |
 
 ## Benchmark Paths — Inside-Sphere Maneuvers
 
 | Inside Yaw Maneuver | Inside Pitch Maneuver |
 |:-------------------:|:---------------------:|
-| ![Inside yaw sphere](src/Animations/Maneuver_inside_yaw_sphere.gif) | ![Inside pitch sphere](src/Animations/Maneuver_inside_pitch_sphere.gif) |
+| <img src="src/Animations/Maneuver_inside_yaw_sphere.gif" width="420"/> | <img src="src/Animations/Maneuver_inside_pitch_sphere.gif" width="420"/> |
 
 # Main code
 
